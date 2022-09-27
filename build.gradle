@@ -1,6 +1,16 @@
 buildscript {
     ext {
         compose_version = '1.1.0-beta01'
+        room_version = "2.4.3"
+    }
+    repositories {
+        google()
+        jcenter()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+        flatDir {
+            dirs 'libs'
+        }
     }
 }// Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
