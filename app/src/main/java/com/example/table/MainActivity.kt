@@ -1,43 +1,58 @@
 package com.example.table
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import android.view.View
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import com.example.table.di.DaggerViewModelFactory
+import com.example.table.di.components.MainActivityComponent
+import com.example.table.ui.showDialog
+import com.example.table.model.db.Group
+import com.example.table.ui.ComposeFragmentContainer
+import com.example.table.ui.FragmentController
 import com.example.table.ui.theme.TableTheme
+import com.example.table.utils.Constant
+import javax.inject.Inject
+import javax.inject.Provider
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var factory: DaggerViewModelFactory
+
+    lateinit var viewModel: MainViewModel
+
+    lateinit var activityComponent: MainActivityComponent
+
+    @Inject
+    lateinit var fragmentMap: Map<Class<out Fragment>, @JvmSuppressWildcards(true) Provider<Fragment>>
+
+    val fragmentContainerId: Int = View.generateViewId()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        activityComponent = (application as TableApp).appComponent.getMainActivityComponent()
+        activityComponent.inject(this)
+        viewModel = ViewModelProvider(this, factory).get(MainViewModel::class.java)
+
         setContent {
             TableTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                ComposeFragmentContainer(viewId = fragmentContainerId, fragmentManager = this.supportFragmentManager
                 ) {
-                    Greeting("Android")
+                    add(it, fragmentMap.get(GroupSelectionFragment::class.java)!!.get())
                 }
+
             }
         }
     }
-}
 
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    TableTheme {
-        Greeting("Android")
+    fun startTimeTableFragment(){
+        FragmentController(fragmentContainerId, fragmentMap.get(TimeTableFragment::class.java)!!.get(), supportFragmentManager)
     }
+
 }
