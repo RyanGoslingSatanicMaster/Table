@@ -7,4 +7,5 @@ interface IGroupRepository {
     suspend fun getGroups(groupRequest: GroupRequest): List<Group>
     suspend fun isGroupInDb(group: Group): Group
     suspend fun deleteGroupData(group: Group)
+    suspend fun getActiveGroup(): Group?
 }

@@ -1,4 +1,4 @@
-package com.example.table
+package com.example.table.components
 
 import android.app.Application
 import android.content.Context
@@ -24,3 +24,7 @@ class TableApp: Application() {
         appComponent = getAppComponent()
     }
 }
+
+// TODO Widget Feature
+// TODO Add HomeTask in the App
+// TODO Add NotificationService and Settings Feature

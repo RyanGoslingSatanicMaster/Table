@@ -1,4 +1,4 @@
-package com.example.table
+package com.example.table.components.fragments
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
@@ -26,6 +26,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.table.components.activity.MainActivity
+import com.example.table.components.activity.MainViewModel
 import com.example.table.di.DaggerViewModelFactory
 import com.example.table.exceptions.ExecuteGroupException
 import com.example.table.exceptions.ExecuteTimeTableException

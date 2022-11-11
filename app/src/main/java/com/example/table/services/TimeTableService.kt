@@ -30,40 +30,5 @@ class TimeTableService @Inject constructor(): ITimeTableService, ApiService() {
     override suspend fun getIndexOfWeek(request: TimeTableRequest) {
 
     }
-    /*
-    // I know it's not beautiful, but for me important work with as less as possible count of models
-    // and i don't want change fields of data class to var!!!!!!!!!!
-    private suspend fun TimeTableWithLesson.save(): TimeTable{
-        val groupId = this.group?.save()
-        val lessonId = this.lesson?.save()
-        return TimeTable(cabinet = this.timeTable.cabinet,
-            time = this.timeTable.time,
-            lessonId = lessonId!!,
-            isFirstWeek = this.timeTable.isFirstWeek,
-            group = groupId!!
-        )
-    }
-
-    private suspend fun Group.save(): Long{
-        return dao.saveGroup(this)
-    }
-
-    private suspend fun LessonWithTeachers.save(): Long{
-        val lessonId = this.lesson?.save()
-        this.teachers?.forEach {
-            dao.insertLessTeachCrossRef(LessonTeacherCrossRef(lessonId!!, it.save()))
-        }
-        return lessonId!!
-    }
-
-    private suspend fun Teacher.save(): Long{
-        return dao.saveTeacher(this)
-
-    }
-
-    private suspend fun Lesson.save(): Long{
-        return dao.saveLesson(this)
-    }
-*/
 
 }

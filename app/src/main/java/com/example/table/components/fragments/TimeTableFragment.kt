@@ -1,67 +1,47 @@
-package com.example.table
+package com.example.table.components.fragments
 
-import android.os.Build
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChangeIgnoreConsumed
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import com.example.table.R
+import com.example.table.components.activity.MainActivity
+import com.example.table.components.activity.MainViewModel
 import com.example.table.di.DaggerViewModelFactory
-import com.example.table.model.DayTimeTable
-import com.example.table.model.WeekTimeTable
-import com.example.table.model.db.Group
+import com.example.table.model.pojo.DayTimeTable
+import com.example.table.model.pojo.WeekTimeTable
 import com.example.table.model.pojo.TimeTableWithLesson
 import com.example.table.ui.AnimatedBackgroundGradient
 import com.example.table.ui.PositionState
-import com.example.table.ui.progressBar
 import com.example.table.ui.theme.Primary
 import com.example.table.ui.theme.TableTheme
 import com.example.table.ui.theme.Typography
 import com.example.table.ui.theme.blue
-import com.example.table.utils.Constant
 import com.example.table.utils.ConverterUtils
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
-import okhttp3.internal.toImmutableList
-import org.intellij.lang.annotations.JdkConstants
-import java.text.SimpleDateFormat
-import java.util.*
 import javax.inject.Inject
 
 class TimeTableFragment @Inject constructor() : Fragment() {
 
     @Inject
     lateinit var factory: DaggerViewModelFactory
-
-    @Inject
-    lateinit var currentDate: Date
 
     private lateinit var viewModel: TimeTableViewModel
 
@@ -85,25 +65,36 @@ class TimeTableFragment @Inject constructor() : Fragment() {
     override fun onResume() {
         super.onResume()
         //viewModel.getTimeTable(activityViewModel.activeGroup.value!!)
-        viewModel.getTimeTable(activityViewModel.activeGroup.value!!)
+        activityViewModel.activeGroup.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+            viewModel.getTimeTable(it)
+        })
     }
 
     @Composable
     fun TimeTableLayout(){
         val list = viewModel.timeTable.observeAsState()
-        if (list.value != null)
-            Box(){
+        if (list.value != null) {
+
+            Box(contentAlignment = Alignment.BottomEnd) {
+                TimeTableNavigationBar({
+                    (activity as MainActivity).startGroupSelectionFragment()
+                })
                 AnimatedBackgroundGradient(
                     duration = 1200,
-                    colors = Primary to blue
-                ){ position, isTop ->
+                    colors = Primary to blue,
+                    topPosition = list.value!!.first.isCurrent
+                ) { position, isTop ->
                     Crossfade(targetState = isTop) {
                         val startIndex by remember {
                             derivedStateOf {
-                                if (it)
-                                    list.value!!.first.days.indexOf(list.value!!.first.days.first { it.day == "Сегодня" }?:null)?:0
-                                else
-                                    list.value!!.second.days.indexOf(list.value!!.second.days.first { it.day == "Сегодня" }?:null)?:0
+                                if (it) {
+                                    val index = list.value!!.first.days.indexOf(list.value!!.first.days.firstOrNull { it.day == "Сегодня" })
+                                    return@derivedStateOf if(index == -1) 0 else index
+                                }
+                                else {
+                                    val index = list.value!!.second.days.indexOf(list.value!!.second.days.firstOrNull { it.day == "Сегодня" })
+                                    return@derivedStateOf if(index == -1) 0 else index
+                                }
                             }
                         }
 
@@ -117,10 +108,36 @@ class TimeTableFragment @Inject constructor() : Fragment() {
 
                 }
             }
+        }
 
     }
+
 }
 
+@Composable
+fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -> Unit = {}){
+    Row(
+        modifier = Modifier
+            .background(
+                shape = RoundedCornerShape(topStart = 30.dp),
+                color = Color.White
+            )
+            .zIndex(1f)
+    ) {
+        Icon(
+            modifier = Modifier
+                .defaultMinSize(minHeight = 50.dp, minWidth = 50.dp)
+                .padding(4.dp)
+                .clickable {
+                    onSearchClick()
+                },
+            painter = painterResource(id = R.drawable.ic_search),
+            contentDescription = null)
+        Icon(modifier = Modifier.defaultMinSize(minHeight = 50.dp, minWidth = 50.dp).padding(4.dp),
+            painter = painterResource(id = R.drawable.ic_settings),
+            contentDescription = null)
+    }
+}
 
 @Composable
 fun ShowTimeTable(fullTimeTable: WeekTimeTable, positionState: PositionState, isFirstWeek: Boolean, startIndex: Int){

@@ -20,4 +20,8 @@ class GroupRepository @Inject constructor(private val service: IGroupService): I
     override suspend fun deleteGroupData(group: Group){
         return service.deleteGroupData(group)
     }
+
+    override suspend fun getActiveGroup(): Group? {
+        return service.getActiveGroup()
+    }
 }

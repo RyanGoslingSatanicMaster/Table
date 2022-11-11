@@ -8,6 +8,7 @@ import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import java.lang.reflect.Type
+import java.util.*
 
 @Entity(indices = [
     Index(value = ["group_name"], unique = true)
@@ -18,7 +19,9 @@ data class Group(
     @ColumnInfo(name = "group_name")
     val groupName: String,
     @ColumnInfo(name = "is_active")
-    val isActive: Boolean
+    val isActive: Boolean,
+    @ColumnInfo(name = "date_of_first_week")
+    val dateOfFirstWeek: Date? = null
 ){
     class GroupDeserializer: JsonDeserializer<Group>{
         override fun deserialize(

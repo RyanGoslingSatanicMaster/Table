@@ -96,6 +96,7 @@ fun alertButton(text: String, onClick: () -> Unit){
 fun AnimatedBackgroundGradient(
     colors: Pair<Color, Color>,
     duration: Int,
+    topPosition: Boolean = true,
     padding: Dp = 0.dp,
     innerElement: @Composable (PositionState, Boolean) -> Unit = { a, b ->
     }
@@ -104,7 +105,7 @@ fun AnimatedBackgroundGradient(
     val xOffset = remember{ mutableStateOf(0f) }
     val yOffset = remember{ mutableStateOf(0f) }
 
-    val positionTop = remember { mutableStateOf(true) }
+    val positionTop = remember { mutableStateOf(topPosition) }
 
     val nextState = remember {
         mutableStateOf(PositionState.Current)
@@ -189,7 +190,7 @@ fun SlideAnimatedContent(
     else
         colorState.value = colors.second
 
-    val colors = listOf(color.copy(alpha = 0.9f), color.copy(alpha = 0.6f), color.copy(alpha = 0.9f))
+    val colors = listOf(color.copy(alpha = 0.9f),color.copy(alpha = 0.6f), color.copy(alpha = 0.9f))
 
     // NEXT ANIMATION
 

@@ -28,4 +28,7 @@ abstract class GroupModule {
 
     @Binds
     abstract fun providesDeleteGroupUseCase(useCase: DeleteGroupUseCase): IDeleteGroupUseCase
+
+    @Binds
+    abstract fun proivdesGetActiveGroupUseCase(useCase:GetActiveGroup): IGetActiveGroup
 }

@@ -1,4 +1,4 @@
-package com.example.table.model
+package com.example.table.model.pojo
 
 import androidx.compose.runtime.Stable
 import com.example.table.model.pojo.TimeTableWithLesson

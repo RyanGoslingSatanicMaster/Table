@@ -9,16 +9,34 @@ import com.example.table.model.pojo.LessonWithTeachers
 import com.example.table.model.pojo.TimeTableWithLesson
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
+import java.util.*
 import kotlin.streams.toList
 
 fun timeTableDeserialization(html: String, group: Group): List<TimeTableWithLesson> {
     val doc = Jsoup.parse(html)
     val firstWeek = doc.getElementById("first")
     val secondWeek = doc.getElementById("second")
-    return firstWeek?.timeTableWeek(true, group)!!.toMutableList().apply {
-        secondWeek?.timeTableWeek(false, group)?.let { addAll(it) }
+    val updatedGroup = Group(
+        groupId = group.groupId,
+        groupName = group.groupName,
+        isActive = group.isActive,
+        dateOfFirstWeek = doc.getElementsByClass("h2-responsive").first()?.getDateOfFirstWeek()
+    )
+    return firstWeek?.timeTableWeek(true, updatedGroup)!!.toMutableList().apply {
+        secondWeek?.timeTableWeek(false, updatedGroup)?.let { addAll(it) }
     }
 
+}
+
+fun Element.getDateOfFirstWeek(): Date {
+    if(this.text().contains("1-ая неделя"))
+        return Date()
+    else {
+        val cal = Calendar.getInstance()
+        cal.time = Date()
+        cal.add(Calendar.DATE, 7)
+        return cal.time
+    }
 }
 
 

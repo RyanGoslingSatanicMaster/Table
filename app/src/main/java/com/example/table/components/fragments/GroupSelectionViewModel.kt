@@ -1,6 +1,5 @@
-package com.example.table
+package com.example.table.components.fragments
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

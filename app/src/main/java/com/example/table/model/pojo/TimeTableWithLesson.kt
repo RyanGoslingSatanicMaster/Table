@@ -16,4 +16,6 @@ data class TimeTableWithLesson(
     val lesson: LessonWithTeachers,
     @Embedded
     val timeTable: TimeTable,
-)
+){
+
+}

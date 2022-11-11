@@ -1,8 +1,8 @@
 package com.example.table.di.modules
 
 import androidx.fragment.app.Fragment
-import com.example.table.GroupSelectionFragment
-import com.example.table.TimeTableFragment
+import com.example.table.components.fragments.GroupSelectionFragment
+import com.example.table.components.fragments.TimeTableFragment
 import com.example.table.annotations.FragmentKey
 import com.example.table.annotations.PerActivity
 import dagger.Binds

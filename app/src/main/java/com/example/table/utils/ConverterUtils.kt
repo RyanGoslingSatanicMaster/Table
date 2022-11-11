@@ -12,16 +12,17 @@ class ConverterUtils {
 
         val formatter = SimpleDateFormat("EEE, HH:mm", Locale("ru"))
         val formatterTime = SimpleDateFormat("HH:mm", Locale("ru"))
+        val formatterDate = SimpleDateFormat("dd-MMMM-yyyy EEE, HH:mm", Locale("ru"))
 
     }
 
     @TypeConverter
     fun fromString(str: String): Date {
-        return formatter.parse(str)
+        return formatterDate.parse(str)
     }
 
     @TypeConverter
     fun fromDate(date: Date): String{
-        return formatter.format(date)
+        return formatterDate.format(date)
     }
 }

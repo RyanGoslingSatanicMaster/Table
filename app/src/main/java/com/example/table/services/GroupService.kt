@@ -22,4 +22,8 @@ class GroupService @Inject constructor(): ApiService(), IGroupService {
     override suspend fun deleteGroupData(group: Group){
         return dao.deleteGroup(group.groupId)
     }
+
+    override suspend fun getActiveGroup(): Group?{
+        return dao.getActiveGroup()
+    }
 }
