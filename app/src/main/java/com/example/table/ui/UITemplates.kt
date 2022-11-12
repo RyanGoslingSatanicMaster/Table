@@ -16,15 +16,24 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import androidx.glance.appwidget.proto.LayoutProto
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.table.R
 import com.example.table.ui.theme.Primary
 import com.example.table.ui.theme.Secondary
 import com.example.table.utils.Constant
@@ -45,10 +54,12 @@ fun progressBar(visible: Boolean){
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White),
+                .background(Color.White)
+                .padding(20.dp),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(color = Primary)
+            val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.loading))
+            LottieAnimation(composition)
         }
     }
 }
@@ -73,7 +84,10 @@ fun showDialog(text: String, onConfirm: () -> Unit = {}, onDismiss: () -> Unit =
             },
             text = @Composable { Text(text = text, color = Color.White) },
             modifier = Modifier
-                .background(brush = Brush.linearGradient(colors = listOf(Primary, Secondary)), shape = RoundedCornerShape(30.dp))
+                .background(
+                    brush = Brush.linearGradient(colors = listOf(Primary, Secondary)),
+                    shape = RoundedCornerShape(30.dp)
+                )
                 .padding(10.dp),
             backgroundColor = Color.Transparent
         )
@@ -255,14 +269,49 @@ fun shimmerRecipeItem(
         start = Offset(xShimmer - gradientWidth, yShimmer - gradientWidth),
         end = Offset(xShimmer, yShimmer)
     )
-    Column(modifier = Modifier
+    Box(modifier = Modifier
         .fillMaxSize()
-        .padding(padding)
         .background(brush)){
         val positionState by remember{ derivedStateOf { position.value } }
         val isTop by remember{ derivedStateOf { positionTop.value } }
+        cloudsAnimation(visible = isTop, Modifier)
+        wheatAnimation(visible = !isTop, Modifier)
         innerElement(positionState, isTop)
+    }
+}
 
+@Composable
+fun wheatAnimation(visible: Boolean, modifier: Modifier){
+    AnimatedVisibility(visible = visible,
+        enter = slideInVertically(initialOffsetY = {
+            it / 2
+        },
+            animationSpec = tween(durationMillis = 1600))
+                + fadeIn(animationSpec = tween(durationMillis = 1600)),
+        exit = slideOutVertically( targetOffsetY = {
+            it / 2
+        }, animationSpec = tween(durationMillis = 1000))
+                + fadeOut(animationSpec = tween(durationMillis = 1000))
+    ) {
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.wheat))
+        LottieAnimation(composition, alignment = Alignment.BottomStart, modifier = modifier
+            .fillMaxSize().clip(RectangleShape))
+    }
+}
 
+@Composable
+fun cloudsAnimation(visible: Boolean, modifier: Modifier){
+    AnimatedVisibility(visible = visible,
+        enter = slideInVertically(animationSpec = tween(durationMillis = 1600))
+                + fadeIn(animationSpec = tween(durationMillis = 1600)),
+        exit = slideOutVertically(animationSpec = tween(durationMillis = 1000))
+                + fadeOut(animationSpec = tween(durationMillis = 1000))
+    ) {
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.clouds))
+        LottieAnimation(composition, alignment = Alignment.TopEnd, modifier = Modifier
+            .fillMaxWidth()
+            .clip(
+                RectangleShape
+            ))
     }
 }

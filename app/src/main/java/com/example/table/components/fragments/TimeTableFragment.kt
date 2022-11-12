@@ -22,6 +22,9 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.table.R
 import com.example.table.components.activity.MainActivity
 import com.example.table.components.activity.MainViewModel
@@ -31,10 +34,9 @@ import com.example.table.model.pojo.WeekTimeTable
 import com.example.table.model.pojo.TimeTableWithLesson
 import com.example.table.ui.AnimatedBackgroundGradient
 import com.example.table.ui.PositionState
-import com.example.table.ui.theme.Primary
-import com.example.table.ui.theme.TableTheme
-import com.example.table.ui.theme.Typography
-import com.example.table.ui.theme.blue
+import com.example.table.ui.cloudsAnimation
+import com.example.table.ui.theme.*
+import com.example.table.ui.wheatAnimation
 import com.example.table.utils.ConverterUtils
 import javax.inject.Inject
 
@@ -75,13 +77,13 @@ class TimeTableFragment @Inject constructor() : Fragment() {
         val list = viewModel.timeTable.observeAsState()
         if (list.value != null) {
 
-            Box(contentAlignment = Alignment.BottomEnd) {
+            Box(modifier = Modifier.fillMaxSize()) {
                 TimeTableNavigationBar({
                     (activity as MainActivity).startGroupSelectionFragment()
-                })
+                }, modifier = Modifier.align(Alignment.BottomEnd))
                 AnimatedBackgroundGradient(
                     duration = 1200,
-                    colors = Primary to blue,
+                    colors = blue to lightBlue,
                     topPosition = list.value!!.first.isCurrent
                 ) { position, isTop ->
                     Crossfade(targetState = isTop) {
@@ -115,9 +117,9 @@ class TimeTableFragment @Inject constructor() : Fragment() {
 }
 
 @Composable
-fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -> Unit = {}){
+fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -> Unit = {}, modifier: Modifier){
     Row(
-        modifier = Modifier
+        modifier = modifier
             .background(
                 shape = RoundedCornerShape(topStart = 30.dp),
                 color = Color.White
@@ -125,7 +127,7 @@ fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -
             .zIndex(1f)
     ) {
         Icon(
-            modifier = Modifier
+            modifier = modifier
                 .defaultMinSize(minHeight = 50.dp, minWidth = 50.dp)
                 .padding(4.dp)
                 .clickable {
@@ -133,7 +135,9 @@ fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -
                 },
             painter = painterResource(id = R.drawable.ic_search),
             contentDescription = null)
-        Icon(modifier = Modifier.defaultMinSize(minHeight = 50.dp, minWidth = 50.dp).padding(4.dp),
+        Icon(modifier = modifier
+            .defaultMinSize(minHeight = 50.dp, minWidth = 50.dp)
+            .padding(4.dp),
             painter = painterResource(id = R.drawable.ic_settings),
             contentDescription = null)
     }
@@ -179,7 +183,6 @@ fun ShowTimeTable(fullTimeTable: WeekTimeTable, positionState: PositionState, is
         enter = slideInVertically(animationSpec = tween(1200)) + fadeIn(animationSpec = tween(1200)),
         exit = slideOutHorizontally(animationSpec = tween(1200)) + fadeOut(animationSpec = tween(1200))
     ) {
-
         ShowCurrentDay(element = element.value, day = element.value.day)
     }
 }

@@ -21,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.TextStyle
@@ -35,10 +36,7 @@ import com.example.table.model.LoadingState
 import com.example.table.model.db.Group
 import com.example.table.ui.progressBar
 import com.example.table.ui.showDialog
-import com.example.table.ui.theme.Hint
-import com.example.table.ui.theme.Primary
-import com.example.table.ui.theme.Secondary
-import com.example.table.ui.theme.yellow
+import com.example.table.ui.theme.*
 import com.example.table.utils.Constant
 import javax.inject.Inject
 
@@ -158,12 +156,12 @@ class GroupSelectionFragment @Inject constructor() : Fragment() {
 fun listItem(group: Group, onItemClick: (Group) -> Unit){
     Box(
         modifier = Modifier
-            .background(Primary, RoundedCornerShape(30.dp))
+            .background(brush = Brush.linearGradient(listOf(Primary, Secondary)), Shapes.small)
             .defaultMinSize(40.dp, 20.dp)
             .clickable { onItemClick(group) },
 
     ){
-        Text(text = group.groupName, style = TextStyle(fontSize = 20.sp, color = Color.White), modifier = Modifier.padding(10.dp))
+        Text(text = group.groupName, style = Typography.h3, color = Color.White, modifier = Modifier.padding(10.dp))
     }
 }
 

@@ -24,7 +24,7 @@
         <activity
             android:name=".components.activity.SplashScreenActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat.Light">
+            android:theme="@style/Theme.Table">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -35,7 +35,7 @@
             android:name=".components.activity.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.AppCompat.Light"></activity>
+            android:theme="@style/Theme.Table"></activity>
 
         <receiver
             android:name=".components.broadcasts.TimeTableWidgetReceiver"
