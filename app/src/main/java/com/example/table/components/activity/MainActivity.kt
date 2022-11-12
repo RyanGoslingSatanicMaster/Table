@@ -2,10 +2,12 @@ package com.example.table.components.activity
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.table.R
 import com.example.table.components.fragments.GroupSelectionFragment
 import com.example.table.components.TableApp
 import com.example.table.components.fragments.TimeTableFragment
@@ -37,6 +39,9 @@ class MainActivity : AppCompatActivity() {
         activityComponent.inject(this)
         viewModel = ViewModelProvider(this, factory).get(MainViewModel::class.java)
         val activeGroup = intent.getBooleanExtra(SplashScreenActivity.ACTIVE_GROUP_TAG, false)
+        onBackPressedDispatcher.addCallback(this){
+            lastBackStackFragment()
+        }
         setContent {
             TableTheme {
                 ComposeFragmentContainer(viewId = fragmentContainerId, fragmentManager = this.supportFragmentManager
@@ -66,6 +71,14 @@ class MainActivity : AppCompatActivity() {
 
     fun startGroupSelectionFragment(){
         FragmentController(fragmentContainerId, fragmentMap.get(GroupSelectionFragment::class.java)!!.get(), supportFragmentManager)
+    }
+
+    private fun lastBackStackFragment(){
+        val stackSize = supportFragmentManager.backStackEntryCount
+        if (stackSize != 0)
+            supportFragmentManager.popBackStack()
+        else
+            finish()
     }
 
 }

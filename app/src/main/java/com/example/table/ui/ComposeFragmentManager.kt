@@ -43,7 +43,10 @@ fun FragmentController(containerId: Int, fragment: Fragment, fragmentManager: Fr
     val fragments = fragmentManager.fragments
     if (fragments.any { it === fragment && it.isVisible})
         return
-    fragmentManager.commit { replace(containerId, fragment) }
+    fragmentManager.commit {
+        replace(containerId, fragment)
+        addToBackStack(fragment.tag)
+    }
 }
 
 private fun FragmentManager.onContainerAvailable(view: FragmentContainerView){
