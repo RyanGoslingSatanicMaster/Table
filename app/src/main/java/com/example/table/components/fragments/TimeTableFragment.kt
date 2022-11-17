@@ -17,6 +17,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
@@ -32,11 +34,8 @@ import com.example.table.di.DaggerViewModelFactory
 import com.example.table.model.pojo.DayTimeTable
 import com.example.table.model.pojo.WeekTimeTable
 import com.example.table.model.pojo.TimeTableWithLesson
-import com.example.table.ui.AnimatedBackgroundGradient
-import com.example.table.ui.PositionState
-import com.example.table.ui.cloudsAnimation
+import com.example.table.ui.*
 import com.example.table.ui.theme.*
-import com.example.table.ui.wheatAnimation
 import com.example.table.utils.ConverterUtils
 import javax.inject.Inject
 
@@ -66,10 +65,14 @@ class TimeTableFragment @Inject constructor() : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        //viewModel.getTimeTable(activityViewModel.activeGroup.value!!)
-        activityViewModel.activeGroup.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+        activityViewModel.activeGroup.observe(viewLifecycleOwner) {
             viewModel.getTimeTable(it)
-        })
+        }
+    }
+
+    override fun onPause() {
+        activityViewModel.activeGroup.removeObservers(viewLifecycleOwner)
+        super.onPause()
     }
 
     @Composable
@@ -80,7 +83,10 @@ class TimeTableFragment @Inject constructor() : Fragment() {
             Box(modifier = Modifier.fillMaxSize()) {
                 TimeTableNavigationBar({
                     (activity as MainActivity).startGroupSelectionFragment()
-                }, modifier = Modifier.align(Alignment.BottomEnd))
+                },{
+                    (activity as MainActivity).startSettingsFragment()
+                },
+                    modifier = Modifier.align(Alignment.BottomEnd))
                 AnimatedBackgroundGradient(
                     duration = 1200,
                     colors = blue to lightBlue,
@@ -134,12 +140,19 @@ fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -
                     onSearchClick()
                 },
             painter = painterResource(id = R.drawable.ic_search),
-            contentDescription = null)
+            contentDescription = null,
+            tint = Primary
+        )
         Icon(modifier = modifier
             .defaultMinSize(minHeight = 50.dp, minWidth = 50.dp)
-            .padding(4.dp),
+            .padding(4.dp)
+            .clickable {
+                onSettingsClick()
+            },
             painter = painterResource(id = R.drawable.ic_settings),
-            contentDescription = null)
+            contentDescription = null,
+            tint = Primary
+        )
     }
 }
 
@@ -183,16 +196,18 @@ fun ShowTimeTable(fullTimeTable: WeekTimeTable, positionState: PositionState, is
         enter = slideInVertically(animationSpec = tween(1200)) + fadeIn(animationSpec = tween(1200)),
         exit = slideOutHorizontally(animationSpec = tween(1200)) + fadeOut(animationSpec = tween(1200))
     ) {
-        ShowCurrentDay(element = element.value, day = element.value.day)
+        ShowCurrentDay(element = element.value, day = element.value.day, isFirstWeek)
     }
 }
 
 @Composable
-fun ShowCurrentDay(element: DayTimeTable, day: String){
+fun ShowCurrentDay(element: DayTimeTable, day: String, isFirstWeek: Boolean){
     Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(10.dp), horizontalAlignment = Alignment.Start) {
-        Text(text = day, style = Typography.h1, color = Color.White)
+        .fillMaxSize(), horizontalAlignment = Alignment.Start) {
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+            Text(text = day, style = Typography.h1, color = Color.White, modifier = Modifier.padding(10.dp))
+            Text(text = if (isFirstWeek) "1-ая неделя" else "2-я неделя", style = Typography.h1, color = Color.White, modifier = Modifier.padding(10.dp))
+        }
         Spacer(modifier = Modifier.height(20.dp))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             element.timeTableList.forEach {
@@ -205,19 +220,43 @@ fun ShowCurrentDay(element: DayTimeTable, day: String){
 
 @Composable
 fun ShowTimeTableItem(timeTableWithLesson: TimeTableWithLesson){
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.Center ) {
-        Text(text = ConverterUtils.formatterTime.format(timeTableWithLesson.timeTable.time), style = Typography.h3, color = Color.White)
-        Spacer(modifier = Modifier.width(5.dp))
-        Column(verticalArrangement = Arrangement.Top, modifier = Modifier.width(200.dp)) {
-            Text(text = timeTableWithLesson.lesson.lesson.lessonName, style = Typography.h3, color = Color.White)
-            Row() {
-                timeTableWithLesson.lesson.teachers.forEach {
-                    Text(text = it.teacherName, style = Typography.body1, color = Color.White)
-                    Spacer(modifier = Modifier.width(2.dp))
-                }
-            }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+            .drawColoredShadow(
+                color = Color.Black,
+                offsetX = 2.dp,
+                offsetY = 5.dp,
+                alpha = 0.6f
+            )
+            .background(
+                brush = Brush.linearGradient(listOf(darkGreen, lightGreen)),
+                shape = Shapes.large
+            )
+            .padding(5.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = ConverterUtils.formatterTime.format(timeTableWithLesson.timeTable.time),
+                style = Typography.h3, color = Color.White,
+                )
+            Text(
+                text = if (timeTableWithLesson.lesson.lesson.isLection) "Лекция" else "Практика",
+                style = Typography.body1, color = Color.White,
+                )
         }
-        Text(text = timeTableWithLesson.timeTable.cabinet?:"", style = Typography.body1, color = Color.White)
+        Column(verticalArrangement = Arrangement.Top, modifier = Modifier.weight(4f)) {
+            Text(text = timeTableWithLesson.lesson.lesson.lessonName, style = Typography.h3, color = Color.White)
+
+            timeTableWithLesson.lesson.teachers.forEach {
+                Text(text = it.teacherName, style = Typography.body1, color = Color.White)
+            }
+
+        }
+        Text(text = timeTableWithLesson.timeTable.cabinet?:"", style = Typography.body1, color = Color.White, modifier = Modifier.weight(1f))
 
     }
 }

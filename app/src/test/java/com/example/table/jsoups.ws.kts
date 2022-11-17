@@ -106,3 +106,14 @@ data class Group(
     val groupName: String
 )
 
+fun comp(a: IntArray?, b: IntArray?): Boolean{
+    var flag = true
+    b?.forEach { el ->
+        if (a?.filter { el == it*it }?.isEmpty() == true)
+            flag = false
+    }
+    if (b == null)
+        flag = false
+    return flag
+}
+

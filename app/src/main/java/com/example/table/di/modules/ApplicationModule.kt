@@ -21,7 +21,7 @@ import java.util.*
 @Module
 class ApplicationModule  {
 
-    private lateinit var app: TableApp
+    private val app: TableApp
 
     private lateinit var api: Api
 

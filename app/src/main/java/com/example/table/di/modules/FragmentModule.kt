@@ -5,6 +5,7 @@ import com.example.table.components.fragments.GroupSelectionFragment
 import com.example.table.components.fragments.TimeTableFragment
 import com.example.table.annotations.FragmentKey
 import com.example.table.annotations.PerActivity
+import com.example.table.components.fragments.SettingsFragment
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoMap
@@ -23,4 +24,10 @@ abstract class FragmentModule {
     @PerActivity
     @FragmentKey(TimeTableFragment::class)
     abstract fun providesTimeTableFragment(fragment: TimeTableFragment): Fragment
+
+    @Binds
+    @IntoMap
+    @PerActivity
+    @FragmentKey(SettingsFragment::class)
+    abstract fun providesSettingsFragment(fragment: SettingsFragment): Fragment
 }

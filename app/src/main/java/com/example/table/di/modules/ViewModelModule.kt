@@ -7,6 +7,7 @@ import com.example.table.components.activity.MainViewModel
 import com.example.table.components.activity.SplashScreenViewModel
 import com.example.table.components.fragments.TimeTableViewModel
 import com.example.table.annotations.ViewModelKey
+import com.example.table.components.fragments.SettingsViewModel
 import com.example.table.di.DaggerViewModelFactory
 import dagger.Binds
 import dagger.Module
@@ -37,5 +38,10 @@ abstract class ViewModelModule {
     @IntoMap
     @ViewModelKey(SplashScreenViewModel::class)
     abstract fun providesSplashScreenVM(viewModel: SplashScreenViewModel): ViewModel
+
+    @Binds
+    @IntoMap
+    @ViewModelKey(SettingsViewModel::class)
+    abstract fun providesSettingsVM(viewModel: SettingsViewModel): ViewModel
 
 }

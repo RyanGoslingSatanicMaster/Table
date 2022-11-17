@@ -2,11 +2,15 @@ package com.example.table.di.modules
 
 import android.app.Activity
 import android.content.Context
+import android.content.SharedPreferences
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.example.table.components.activity.MainActivity
 import dagger.Module
 import dagger.Provides
 
 @Module
-class ActivityModule constructor(private val activity: Activity) {
+class ActivityModule constructor(private val activity: MainActivity) {
 
     @Provides
     fun provideContext(): Context{
@@ -17,4 +21,7 @@ class ActivityModule constructor(private val activity: Activity) {
     fun provideActivity(): Activity{
         return activity
     }
+
+    @Provides
+    fun provideSharedPref() = activity.getPreferences(Context.MODE_PRIVATE)
 }
