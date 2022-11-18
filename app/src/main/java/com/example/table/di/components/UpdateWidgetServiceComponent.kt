@@ -1,9 +1,9 @@
 package com.example.table.di.components
 
-import com.example.table.components.services.UpdateWidgetService
+import com.example.table.components.services.AlarmService
 import dagger.Subcomponent
 
 @Subcomponent
 interface UpdateWidgetServiceComponent {
-    fun inject(service: UpdateWidgetService)
+    fun inject(service: AlarmService)
 }

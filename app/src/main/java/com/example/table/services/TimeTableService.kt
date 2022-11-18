@@ -4,8 +4,10 @@ import android.util.Log
 import com.example.table.model.db.*
 import com.example.table.model.pojo.LessonWithTeachers
 import com.example.table.model.pojo.TimeTableWithLesson
+import com.example.table.model.requests.NextLessonRequest
 import com.example.table.model.requests.TimeTableRequest
 import com.example.table.utils.timeTableDeserialization
+import java.util.*
 import javax.inject.Inject
 
 class TimeTableService @Inject constructor(): ITimeTableService, ApiService() {
@@ -27,8 +29,7 @@ class TimeTableService @Inject constructor(): ITimeTableService, ApiService() {
         return dao.getGroupTimeTable(group)
     }
 
-    override suspend fun getIndexOfWeek(request: TimeTableRequest) {
-
+    override suspend fun getNextLessonTime(request: NextLessonRequest): Date {
+        return dao.getNextLessonTime(request)
     }
-
 }

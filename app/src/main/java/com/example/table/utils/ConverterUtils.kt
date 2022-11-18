@@ -12,6 +12,7 @@ class ConverterUtils {
 
         val formatter = SimpleDateFormat("EEE, HH:mm", Locale("ru"))
         val formatterTime = SimpleDateFormat("HH:mm", Locale("ru"))
+        val formatterDay = SimpleDateFormat("EEE", Locale("ru"))
         val formatterDate = SimpleDateFormat("dd-MMMM-yyyy EEE, HH:mm", Locale("ru"))
 
     }

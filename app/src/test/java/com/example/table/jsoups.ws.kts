@@ -3,16 +3,48 @@ import androidx.room.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
+import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
 import java.io.BufferedReader
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.max
 import kotlin.streams.toList
 
-timeTableDeserialization(Group(groupName = "ИТ1901")).forEach {
-    println(it)
-}
+println(EnoughIsEnough.deleteNth(intArrayOf(20, 37, 20, 21), 1).toString())
+object EnoughIsEnough {
+    fun deleteNth(elements:IntArray, maxOcurrences:Int):IntArray {
+        val map = mutableMapOf<Int, Int>()
+        val list = mutableListOf<Int>()
+        elements.forEach{
+            val el = map[it]
+            if(el != null) {
+                if (el != maxOcurrences) {
+                    map[it] = el + 1
+                    list.add(it)
+                }
+            }
+            else{
+                map[it]=1
+                list.add(it)
+            }
+        }
+        return list.toIntArray()
+    }
 
+    fun List<Int>.maxCount(elem: Int, maxOcc: Int): Boolean{
+        var count = 0
+        this.forEach{
+            if(it == elem)
+                count+=1
+            if(count>=maxOcc)
+                return false
+
+        }
+        return count<maxOcc
+    }
+}
 val formatter = SimpleDateFormat("EEE, HH:mm", Locale("ru"))
 
 fun timeTableDeserialization(group: Group): List<TimeTableWithLesson> {

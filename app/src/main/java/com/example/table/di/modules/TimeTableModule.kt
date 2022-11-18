@@ -4,10 +4,7 @@ import com.example.table.repositories.ITimeTableRepository
 import com.example.table.repositories.TimeTableRepository
 import com.example.table.services.ITimeTableService
 import com.example.table.services.TimeTableService
-import com.example.table.usecases.GetTimeTableUseCase
-import com.example.table.usecases.IGetTimeTableUseCase
-import com.example.table.usecases.ITimeTableUseCase
-import com.example.table.usecases.TimeTableUseCase
+import com.example.table.usecases.*
 import dagger.Binds
 import dagger.Module
 
@@ -25,4 +22,7 @@ abstract class TimeTableModule {
 
     @Binds
     abstract fun providesGetUseCase(useCase: GetTimeTableUseCase): IGetTimeTableUseCase
+
+    @Binds
+    abstract fun providesGetNextLesson(usecase: GetNextLessonTime): IGetNextLessonTime
 }

@@ -5,7 +5,9 @@ import androidx.room.*
 import com.example.table.model.db.*
 import com.example.table.model.pojo.LessonWithTeachers
 import com.example.table.model.pojo.TimeTableWithLesson
+import com.example.table.model.requests.NextLessonRequest
 import kotlinx.coroutines.flow.Flow
+import java.util.*
 
 @Dao
 interface TimeTableDao {
@@ -114,6 +116,29 @@ interface TimeTableDao {
 
     @Query("DELETE FROM timetable WHERE lesson IN (:lessonId)")
     suspend fun deleteTimeTable(lessonId: List<Long>)
+
+    @Query("SELECT time FROM timetable, lesson" +
+            " WHERE timetable.time LIKE '%' || :day || '%' AND timetable.lesson LIKE lesson.lessonId AND lesson.`group` LIKE :groupId AND lesson.is_lection LIKE 1")
+    suspend fun getNextLectionTime(day: String, groupId: Long): List<Date>
+
+    @Query("SELECT time FROM timetable, lesson" +
+            " WHERE timetable.time LIKE '%' || :day || '%''%:day%' AND timetable.lesson LIKE lesson.lessonId AND lesson.`group` LIKE :groupId AND lesson.is_lection LIKE 0")
+    suspend fun getNextPracticeTime(day: String, groupId: Long): List<Date>
+
+    @Query("SELECT time FROM timetable, lesson" +
+            " WHERE timetable.time LIKE '%' || :day || '%' AND timetable.lesson LIKE lesson.lessonId AND lesson.`group` LIKE :groupId")
+    suspend fun getNextAllLessonTime(day: String, groupId: Long): List<Date>
+
+    @Transaction
+    suspend fun getNextLessonTime(request: NextLessonRequest): Date{
+        val group = getActiveGroup()
+        val list = when(request.notify){
+            true to false -> getNextLectionTime(request.day, group.groupId)
+            false to true -> getNextPracticeTime(request.day, group.groupId)
+            else -> getNextAllLessonTime(request.day, group.groupId)
+        }
+        return list.sortedByDescending { it }.get(0)
+    }
 
     /** LessonTeacherCrossRef */
 

@@ -1,6 +1,7 @@
 package com.example.table.di.modules
 
 import android.app.Activity
+import android.app.AlarmManager
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
@@ -24,4 +25,7 @@ class ActivityModule constructor(private val activity: MainActivity) {
 
     @Provides
     fun provideSharedPref() = activity.getPreferences(Context.MODE_PRIVATE)
+
+    @Provides
+    fun provideAlarmManager() = activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 }

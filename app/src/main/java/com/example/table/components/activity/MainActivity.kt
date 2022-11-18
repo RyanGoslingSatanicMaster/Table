@@ -1,5 +1,9 @@
 package com.example.table.components.activity
 
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
@@ -11,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.table.R
 import com.example.table.components.fragments.GroupSelectionFragment
 import com.example.table.components.TableApp
+import com.example.table.components.broadcasts.AlarmReceiver
 import com.example.table.components.fragments.SettingsFragment
 import com.example.table.components.fragments.TimeTableFragment
 import com.example.table.di.DaggerViewModelFactory
@@ -33,9 +38,14 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var fragmentMap: Map<Class<out Fragment>, @JvmSuppressWildcards(true) Provider<Fragment>>
 
+    @Inject
+    lateinit var alarmManager: AlarmManager
+
     lateinit var viewModel: MainViewModel
 
     lateinit var activityComponent: MainActivityComponent
+
+
 
     val fragmentContainerId: Int = View.generateViewId()
 
@@ -58,11 +68,17 @@ class MainActivity : AppCompatActivity() {
 
         val activeGroup = intent.getBooleanExtra(SplashScreenActivity.ACTIVE_GROUP_TAG, false)
 
+        alarmManager = this.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        getNotifications()
+
+        viewModel.notificationSettings.observe(this){
+            alarmManager.nextAlarmClock
+        }
+
         onBackPressedDispatcher.addCallback(this){
             lastBackStackFragment()
         }
-
-        getNotifications()
 
         setContent {
             TableTheme {
@@ -99,6 +115,15 @@ class MainActivity : AppCompatActivity() {
             putBoolean(LECTION_NOTIFY_KEY, pair.first)
             putBoolean(PRACTICE_NOTIFY_KEY, pair.second)
             apply()
+        }
+        val alarmIntent = Intent(this, AlarmReceiver::class.java).let {
+            PendingIntent.getBroadcast(this, 0, it, 0)
+        }
+        val previousAlarm = alarmManager.nextAlarmClock
+        if (previousAlarm != null)
+            alarmManager.cancel(alarmIntent)
+        if (pair.first || pair.second) {
+
         }
     }
 
