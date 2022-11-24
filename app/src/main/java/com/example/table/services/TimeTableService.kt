@@ -30,6 +30,6 @@ class TimeTableService @Inject constructor(): ITimeTableService, ApiService() {
     }
 
     override suspend fun getNextLessonTime(request: NextLessonRequest): Date {
-        return dao.getNextLessonTime(request)
+        return dao.getNextDayLessonsTime(request).get(0)
     }
 }

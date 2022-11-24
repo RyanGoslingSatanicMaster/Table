@@ -5,5 +5,6 @@ import java.util.*
 
 data class NextLessonRequest(
     val day: String,
-    val notify: Pair<Boolean, Boolean>
+    val notify: Pair<Boolean, Boolean>,
+    val isFirstWeek: Boolean
 )

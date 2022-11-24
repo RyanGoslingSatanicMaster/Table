@@ -29,6 +29,9 @@ interface TimeTableDao {
     @Query("SELECT * FROM `Group` WHERE is_active LIKE 1")
     suspend fun getActiveGroup(): Group
 
+    @Query("SELECT * FROM `Group`")
+    suspend fun getAllGroup(): List<Group>
+
     @Query("SELECT * FROM `Group` WHERE group_name = :groupName")
     suspend fun getGroupByName(groupName: String): Group
 
@@ -62,6 +65,12 @@ interface TimeTableDao {
     @Query("SELECT teacherId FROM Teacher WHERE teacher_name LIKE :teacherName AND url LIKE :url")
     suspend fun getTeacherId(teacherName: String, url: String): Long
 
+    @Query("SELECT * FROM Teacher")
+    suspend fun getAllTeacher(): List<Teacher>
+
+    @Query("DELETE FROM Teacher WHERE teacherId IN (:teacherIds)")
+    suspend fun deleteTeacherByTeacherId(teacherIds: List<Long>)
+
     @Delete
     suspend fun deleteTeacher(vararg teacher: Teacher)
 
@@ -85,11 +94,17 @@ interface TimeTableDao {
     @Update
     suspend fun updateLesson(lesson: Lesson): Int
 
+    @Query("DELETE FROM lesson WHERE lessonId IN (:lessonIds)")
+    suspend fun deleteLessonsById(lessonIds: List<Long>)
+
     @Query("SELECT lessonId FROM lesson WHERE lesson_name LIKE :lessonName AND is_lection LIKE :isLection")
     suspend fun getLessonId(lessonName: String, isLection: Int): Long
 
     @Query("SELECT lessonId FROM lesson WHERE `group` LIKE :groupId")
     suspend fun getLessonIdByGroupId(groupId: Long): List<Long>
+
+    @Query("SELECT * FROM lesson")
+    suspend fun getAllLesson(): List<Lesson>
 
     @Transaction
     suspend fun saveLesson(lesson: Lesson, withUpdate: Boolean): Long {
@@ -114,30 +129,36 @@ interface TimeTableDao {
     @Query("SELECT * FROM timetable WHERE lesson IN (:lessonIds)")
     suspend fun getTimeTableByLessonId(lessonIds: List<Long>): List<TimeTableWithLesson>
 
+    @Query("SELECT * FROM timetable")
+    suspend fun getAllTimeTable(): List<TimeTable>
+
     @Query("DELETE FROM timetable WHERE lesson IN (:lessonId)")
     suspend fun deleteTimeTable(lessonId: List<Long>)
 
     @Query("SELECT time FROM timetable, lesson" +
-            " WHERE timetable.time LIKE '%' || :day || '%' AND timetable.lesson LIKE lesson.lessonId AND lesson.`group` LIKE :groupId AND lesson.is_lection LIKE 1")
-    suspend fun getNextLectionTime(day: String, groupId: Long): List<Date>
+            " WHERE timetable.time LIKE '%' || :day || '%' AND timetable.is_first_week LIKE :isFirstWeek " +
+            "AND timetable.lesson LIKE lesson.lessonId AND lesson.`group` LIKE :groupId AND lesson.is_lection LIKE 1")
+    suspend fun getNextLectionTime(day: String, groupId: Long, isFirstWeek: Boolean): List<Date>
 
     @Query("SELECT time FROM timetable, lesson" +
-            " WHERE timetable.time LIKE '%' || :day || '%''%:day%' AND timetable.lesson LIKE lesson.lessonId AND lesson.`group` LIKE :groupId AND lesson.is_lection LIKE 0")
-    suspend fun getNextPracticeTime(day: String, groupId: Long): List<Date>
+            " WHERE timetable.time LIKE '%' || :day || '%' AND timetable.is_first_week LIKE :isFirstWeek " +
+            "AND timetable.lesson LIKE lesson.lessonId AND lesson.`group` LIKE :groupId AND lesson.is_lection LIKE 0")
+    suspend fun getNextPracticeTime(day: String, groupId: Long, isFirstWeek: Boolean): List<Date>
 
     @Query("SELECT time FROM timetable, lesson" +
-            " WHERE timetable.time LIKE '%' || :day || '%' AND timetable.lesson LIKE lesson.lessonId AND lesson.`group` LIKE :groupId")
-    suspend fun getNextAllLessonTime(day: String, groupId: Long): List<Date>
+            " WHERE timetable.time LIKE '%' || :day || '%' AND timetable.is_first_week LIKE :isFirstWeek " +
+            "AND timetable.lesson LIKE lesson.lessonId AND lesson.`group` LIKE :groupId")
+    suspend fun getNextAllLessonTime(day: String, groupId: Long, isFirstWeek: Boolean): List<Date>
 
     @Transaction
-    suspend fun getNextLessonTime(request: NextLessonRequest): Date{
+    suspend fun getNextDayLessonsTime(request: NextLessonRequest): List<Date>{
         val group = getActiveGroup()
         val list = when(request.notify){
-            true to false -> getNextLectionTime(request.day, group.groupId)
-            false to true -> getNextPracticeTime(request.day, group.groupId)
-            else -> getNextAllLessonTime(request.day, group.groupId)
+            true to false -> getNextLectionTime(request.day, group.groupId, request.isFirstWeek)
+            false to true -> getNextPracticeTime(request.day, group.groupId, request.isFirstWeek)
+            else -> getNextAllLessonTime(request.day, group.groupId, request.isFirstWeek)
         }
-        return list.sortedByDescending { it }.get(0)
+        return list.sortedByDescending { it }
     }
 
     /** LessonTeacherCrossRef */
@@ -148,8 +169,17 @@ interface TimeTableDao {
     @Update
     suspend fun updateLessTeacherCrossRef(crossRef: LessonTeacherCrossRef): Int
 
+    @Query("DELETE FROM LessonTeacherCrossRef WHERE lessonId IN (:lessonId)")
+    suspend fun deleteCrossRefByLessonId(lessonId: List<Long>)
+
+    @Query("SELECT teacherId FROM LessonTeacherCrossRef WHERE lessonId IN (:lessonId)")
+    suspend fun getTeacherIdsByLessonId(lessonId: List<Long>): List<Long>
+
     @Query("SELECT teacherId FROM LessonTeacherCrossRef WHERE lessonId LIKE :lessonId AND teacherId LIKE :teacherId")
     suspend fun getCrossRefId(lessonId: Long, teacherId: Long): Long
+
+    @Query("SELECT * FROM LessonTeacherCrossRef")
+    suspend fun getAllCrossRef(): List<LessonTeacherCrossRef>
 
     @Transaction
     suspend fun saveLessonTeacherCrossRef(crossRef: LessonTeacherCrossRef, withUpdate: Boolean): Long {
@@ -173,8 +203,13 @@ interface TimeTableDao {
 
     @Transaction
     suspend fun deleteTimeTableOfGroup(groupId: Long){
-        val Ids = getLessonIdByGroupId(groupId)
-        deleteTimeTable(Ids)
+        val lessonId = getLessonIdByGroupId(groupId)
+        val teacherId = getTeacherIdsByLessonId(lessonId)
+        deleteTimeTable(lessonId)
+        deleteCrossRefByLessonId(lessonId)
+        deleteTeacherByTeacherId(teacherId)
+        deleteLessonsById(lessonId)
+        deleteGroup(groupId)
     }
 
     @Transaction
