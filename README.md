@@ -8,3 +8,4 @@ During development, I used the following technologies:
 5. Unit Test's implemented using JUnit.
 6. Widget UI built using Glance.
 7. Vector Animation provided by Lottie Animation.
+8. Html parser developed using Jsoup Library.
