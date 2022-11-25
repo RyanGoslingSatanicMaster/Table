@@ -13,13 +13,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -135,64 +142,74 @@ fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -
         Icon(
             modifier = modifier
                 .defaultMinSize(minHeight = 50.dp, minWidth = 50.dp)
-                .padding(4.dp)
+                .padding(4.dp).graphicsLayer(alpha = 0.99f)
+                .drawWithCache {
+                    onDrawWithContent {
+                        drawContent()
+                        drawRect(Brush.linearGradient(listOf(Secondary, Primary)), blendMode = BlendMode.SrcAtop)
+                    }
+                }
                 .clickable {
                     onSearchClick()
                 },
-            painter = painterResource(id = R.drawable.ic_search),
-            contentDescription = null,
-            tint = Primary
+            imageVector = Icons.Default.Search,
+            contentDescription = null
         )
         Icon(modifier = modifier
             .defaultMinSize(minHeight = 50.dp, minWidth = 50.dp)
-            .padding(4.dp)
+            .padding(4.dp).graphicsLayer(alpha = 0.99f)
+            .drawWithCache {
+                onDrawWithContent {
+                    drawContent()
+                    drawRect(Brush.linearGradient(listOf(Secondary, Primary)), blendMode = BlendMode.SrcAtop)
+                }
+            }
             .clickable {
                 onSettingsClick()
             },
-            painter = painterResource(id = R.drawable.ic_settings),
-            contentDescription = null,
-            tint = Primary
+            imageVector = Icons.Default.Settings,
+            contentDescription = null
         )
     }
 }
 
 @Composable
 fun ShowTimeTable(fullTimeTable: WeekTimeTable, positionState: PositionState, isFirstWeek: Boolean, startIndex: Int){
-    val currentIndex = remember { mutableStateOf(
+    val currentIndex = remember(isFirstWeek) { mutableStateOf(
         startIndex
     ) }
-    val upgrated = remember {
+    val upgraded = remember {
         mutableStateOf(false)
     }
-    val element = remember {
+    val element = remember(currentIndex) {
         mutableStateOf(fullTimeTable.days.get(currentIndex.value))
     }
     when{
-        positionState == PositionState.Previous && !upgrated.value -> {
+        positionState == PositionState.Previous && !upgraded.value -> {
             currentIndex.value =
                 if (currentIndex.value == 0)
                     fullTimeTable.days.size - 1
                 else
                     currentIndex.value - 1
-            upgrated.value = true
+            upgraded.value = true
         }
 
-        positionState == PositionState.Next && !upgrated.value -> {
+        positionState == PositionState.Next && !upgraded.value -> {
             currentIndex.value =
                 if (currentIndex.value == fullTimeTable.days.size - 1)
                     0
                 else
                     currentIndex.value + 1
-            upgrated.value = true
+            upgraded.value = true
         }
 
         positionState == PositionState.Current -> {
-            upgrated.value = false
-            element.value = fullTimeTable.days.get(currentIndex.value)
+            upgraded.value = false
+            //element.value = fullTimeTable.days.get(currentIndex.value)
         }
     }
     AnimatedVisibility(
-        visible = !upgrated.value,
+        visible = !upgraded.value,
         enter = slideInVertically(animationSpec = tween(1200)) + fadeIn(animationSpec = tween(1200)),
         exit = slideOutHorizontally(animationSpec = tween(1200)) + fadeOut(animationSpec = tween(1200))
     ) {
