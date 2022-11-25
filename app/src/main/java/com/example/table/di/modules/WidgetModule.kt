@@ -2,6 +2,7 @@ package com.example.table.di.modules
 
 import android.content.Context
 import com.example.table.annotations.ApplicationContext
+import com.example.table.annotations.DayWeek
 import com.example.table.components.TableApp
 import com.example.table.datasource.remote.Api
 import com.example.table.model.db.Group
@@ -39,8 +40,16 @@ class WidgetModule constructor(private val context: Context) {
     fun providesApplicationContext() = context
 
     @Provides
-    fun providesDayWeek(): List<String> = listOf("Воскресение", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота")
-
+    @DayWeek
+    fun providesDayWeek(): List<Pair<String, String>> = listOf(
+        "Воскресение" to "вск",
+        "Понедельник" to "пн",
+        "Вторник" to "вт",
+        "Среда" to "ср",
+        "Четверг" to "чт",
+        "Пятница" to "пт",
+        "Суббота" to "сб"
+    )
     @Provides
     fun providesCurrentDay() = Date()
 }

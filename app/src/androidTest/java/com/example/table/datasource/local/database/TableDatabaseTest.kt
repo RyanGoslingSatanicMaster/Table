@@ -68,8 +68,18 @@ class TableDatabaseTest: TestCase() {
 
     @Test
     fun getNextTimeTest()= runBlocking {
-        val next = dao.getNextDayLessonsTime(NextLessonRequest(day = "пн", true to true, true))
-        assert(ConverterUtils.formatterTime.format(next.sortedBy { it }.get(0))=="11:30")
+        var next = dao.getNextDayLessonsTime(day = "пн", isFirstWeek = true, groupName = "ИТ1901")
+        assert(ConverterUtils.formatterTime.format(next.sortedBy { it.timeTable.time }.get(0).timeTable.time)=="11:30")
+        next = dao.getNextDayLessonsTime(day = "пн", isFirstWeek = false, groupName = "ИТ1901")
+        assert(ConverterUtils.formatterTime.format(next.sortedBy { it.timeTable.time }.get(0).timeTable.time)=="09:45")
+        next = dao.getNextDayLessonsTime(day = "ср", isFirstWeek = true, groupName = "ИТ1901")
+        assert(ConverterUtils.formatterTime.format(next.sortedBy { it.timeTable.time }.get(0).timeTable.time)=="08:00")
+        next = dao.getNextDayLessonsTime(day = "ср", isFirstWeek = false, groupName = "ИТ1901")
+        assert(ConverterUtils.formatterTime.format(next.sortedBy { it.timeTable.time }.get(0).timeTable.time)=="08:00")
+        next = dao.getNextDayLessonsTime(day = "вс", isFirstWeek = true, groupName = "ИТ1901")
+        assert(next.isEmpty())
+        next = dao.getNextDayLessonsTime(day = "вс", isFirstWeek = false, groupName = "ИТ1901")
+        assert(next.isEmpty())
     }
 
     @Test

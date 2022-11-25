@@ -61,12 +61,10 @@ fun timeTableDay(el: Element, group: Group, isFirstWeek: Boolean): List<TimeTabl
 
     else {
         val intermList = el.select("tr").toList()
-        lessonList = listOf()
+        lessonList = mutableListOf<Element>()
         intermList.forEach { lesson ->
-            if(lesson.getElementsByClass("diss").text()!!.isNotEmpty())
-                lessonList.toMutableList().apply {
-                    add(lesson)
-                }
+            if(lesson.getElementsByClass("diss").text().isNotEmpty())
+                lessonList.add(lesson)
         }
     }
 

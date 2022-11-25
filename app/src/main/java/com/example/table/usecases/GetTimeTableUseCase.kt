@@ -2,6 +2,7 @@ package com.example.table.usecases
 
 import android.os.Build
 import android.util.Log
+import com.example.table.annotations.DayWeek
 import com.example.table.model.pojo.DayTimeTable
 import com.example.table.model.pojo.WeekTimeTable
 import com.example.table.model.db.Group
@@ -13,7 +14,7 @@ import java.util.*
 import javax.inject.Inject
 
 class GetTimeTableUseCase @Inject constructor(private val repository: ITimeTableRepository,
-                                              private val dayWeek: List<String>,
+                                              @DayWeek private val dayWeek: List<Pair<String, String>>,
                                               private val currentDate: Date): IGetTimeTableUseCase,
     UseCase<Pair<WeekTimeTable, WeekTimeTable>, Group>() {
 
@@ -42,7 +43,7 @@ class GetTimeTableUseCase @Inject constructor(private val repository: ITimeTable
                     when{
                         currentWeek && currentDate.day == remainder[0].timeTable.time.day -> "Сегодня"
                         currentWeek && currentDate.day + 1 == remainder[0].timeTable.time.day -> "Завтра"
-                        else -> dayWeek[remainder[0].timeTable.time.day]
+                        else -> dayWeek[remainder[0].timeTable.time.day].first
                     },
                     middleList.first
                 )

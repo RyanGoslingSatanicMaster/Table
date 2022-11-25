@@ -25,7 +25,7 @@ class TimeTableRepository @Inject constructor(private val service: ITimeTableSer
         return service.getTimeTableGroup(group)
     }
 
-    override suspend fun getNextLessonTime(request: NextLessonRequest): Date {
-        return service.getNextLessonTime(request)
+    override suspend fun getDayTimeTable(groupName: String, isFirstWeek: Boolean, day: String): List<TimeTableWithLesson> {
+        return service.getDayTimeTable(groupName, isFirstWeek, day)
     }
 }

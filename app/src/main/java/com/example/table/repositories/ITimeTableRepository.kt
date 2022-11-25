@@ -11,5 +11,5 @@ interface ITimeTableRepository {
     suspend fun getTimeTable(timeTableRequest: TimeTableRequest)
     suspend fun getTimeTableActiveGroup(): List<TimeTableWithLesson>
     suspend fun getTimeTableGroup(group: Group): List<TimeTableWithLesson>
-    suspend fun getNextLessonTime(request: NextLessonRequest): Date
+    suspend fun getDayTimeTable(groupName: String, isFirstWeek: Boolean, day: String): List<TimeTableWithLesson>
 }

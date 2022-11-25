@@ -8,7 +8,7 @@ import java.util.*
 
 interface ITimeTableService {
     suspend fun getTimeTable(request: TimeTableRequest)
-    suspend fun getNextLessonTime(request: NextLessonRequest): Date
+    suspend fun getDayTimeTable(groupName: String, isFirstWeek: Boolean, day: String): List<TimeTableWithLesson>
     suspend fun getTimeTableActiveGroup(): List<TimeTableWithLesson>
     suspend fun getTimeTableGroup(group: Group): List<TimeTableWithLesson>
 }

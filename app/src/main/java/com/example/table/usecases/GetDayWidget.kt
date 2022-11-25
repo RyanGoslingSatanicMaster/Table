@@ -1,6 +1,7 @@
 package com.example.table.usecases
 
 import android.os.Build
+import com.example.table.annotations.DayWeek
 import com.example.table.model.pojo.DayTimeTable
 import com.example.table.model.pojo.TimeTableWithLesson
 import com.example.table.repositories.ITimeTableRepository
@@ -9,7 +10,7 @@ import java.util.*
 import javax.inject.Inject
 
 class GetDayWidget @Inject constructor(private val timeTableRepository: ITimeTableRepository,
-                                       private val dayWeek: List<String>,
+                                       @DayWeek private val dayWeek: List<Pair<String, String>>,
                                        private val currentDate: Date
 ): UseCase<DayTimeTable, Int>(), IGetDayWidget {
 
@@ -31,7 +32,7 @@ class GetDayWidget @Inject constructor(private val timeTableRepository: ITimeTab
             when{
                 index == currentDate.day -> "Сегодня"
                 index == currentDate.day + 1 -> "Завтра"
-                else -> dayWeek[index]
+                else -> dayWeek[index].first
             },
             this.filter { it.timeTable.isFirstWeek == isFirstWeek && it.timeTable.time.day == index }
         )

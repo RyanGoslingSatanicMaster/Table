@@ -29,7 +29,7 @@ class TimeTableService @Inject constructor(): ITimeTableService, ApiService() {
         return dao.getGroupTimeTable(group)
     }
 
-    override suspend fun getNextLessonTime(request: NextLessonRequest): Date {
-        return dao.getNextDayLessonsTime(request).get(0)
+    override suspend fun getDayTimeTable(groupName: String, isFirstWeek: Boolean, day: String): List<TimeTableWithLesson> {
+        return dao.getNextDayLessonsTime(groupName, isFirstWeek, day)
     }
 }

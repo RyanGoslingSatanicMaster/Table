@@ -135,30 +135,25 @@ interface TimeTableDao {
     @Query("DELETE FROM timetable WHERE lesson IN (:lessonId)")
     suspend fun deleteTimeTable(lessonId: List<Long>)
 
-    @Query("SELECT time FROM timetable, lesson" +
+   /* @Query("SELECT time, is_lection FROM timetable, lesson" +
             " WHERE timetable.time LIKE '%' || :day || '%' AND timetable.is_first_week LIKE :isFirstWeek " +
             "AND timetable.lesson LIKE lesson.lessonId AND lesson.`group` LIKE :groupId AND lesson.is_lection LIKE 1")
-    suspend fun getNextLectionTime(day: String, groupId: Long, isFirstWeek: Boolean): List<Date>
+    suspend fun getNextLectionTime(day: String, groupId: Long, isFirstWeek: Boolean): List<Pair<Date, Boolean>>
 
     @Query("SELECT time FROM timetable, lesson" +
             " WHERE timetable.time LIKE '%' || :day || '%' AND timetable.is_first_week LIKE :isFirstWeek " +
             "AND timetable.lesson LIKE lesson.lessonId AND lesson.`group` LIKE :groupId AND lesson.is_lection LIKE 0")
-    suspend fun getNextPracticeTime(day: String, groupId: Long, isFirstWeek: Boolean): List<Date>
+    suspend fun getNextPracticeTime(day: String, groupId: Long, isFirstWeek: Boolean): List<Date>*/
 
-    @Query("SELECT time FROM timetable, lesson" +
+    @Query("SELECT * FROM timetable, lesson" +
             " WHERE timetable.time LIKE '%' || :day || '%' AND timetable.is_first_week LIKE :isFirstWeek " +
             "AND timetable.lesson LIKE lesson.lessonId AND lesson.`group` LIKE :groupId")
-    suspend fun getNextAllLessonTime(day: String, groupId: Long, isFirstWeek: Boolean): List<Date>
+    suspend fun getNextAllLessonTime(day: String, groupId: Long, isFirstWeek: Boolean): List<TimeTableWithLesson>
 
     @Transaction
-    suspend fun getNextDayLessonsTime(request: NextLessonRequest): List<Date>{
-        val group = getActiveGroup()
-        val list = when(request.notify){
-            true to false -> getNextLectionTime(request.day, group.groupId, request.isFirstWeek)
-            false to true -> getNextPracticeTime(request.day, group.groupId, request.isFirstWeek)
-            else -> getNextAllLessonTime(request.day, group.groupId, request.isFirstWeek)
-        }
-        return list.sortedByDescending { it }
+    suspend fun getNextDayLessonsTime(groupName: String, isFirstWeek: Boolean, day: String): List<TimeTableWithLesson>{
+        val group = getGroupByName(groupName)
+        return getNextAllLessonTime(day, group.groupId, isFirstWeek)
     }
 
     /** LessonTeacherCrossRef */

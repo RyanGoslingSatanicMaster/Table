@@ -6,19 +6,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.table.model.LoadingState
 import com.example.table.model.db.Group
+import com.example.table.model.requests.NextLessonRequest
 import com.example.table.model.requests.TimeTableRequest
-import com.example.table.usecases.GetActiveGroup
-import com.example.table.usecases.IGetActiveGroup
-import com.example.table.usecases.IGroupUseCase
-import com.example.table.usecases.ITimeTableUseCase
+import com.example.table.usecases.*
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
-class MainViewModel @Inject constructor(private val getActiveGroup: IGetActiveGroup): ViewModel() {
+class MainViewModel @Inject constructor(private val getActiveGroup: IGetActiveGroup,
+                                        private val getNextLessonTime: IGetNextLessonTime): ViewModel() {
 
     val activeGroup = MutableLiveData<Group>()
 
     val notificationSettings = MutableLiveData<Pair<Boolean, Boolean>>()
+
+    val nextLessonTime = MutableLiveData<Date>()
 
     fun setGroup(group: Group){
         activeGroup.value = group
@@ -27,6 +29,12 @@ class MainViewModel @Inject constructor(private val getActiveGroup: IGetActiveGr
     fun getActiveGroup(){
         viewModelScope.launch {
             activeGroup.postValue(getActiveGroup.getActiveGroup())
+        }
+    }
+
+    fun getNextLessonTime(request: NextLessonRequest){
+        viewModelScope.launch {
+            nextLessonTime.postValue(getNextLessonTime.getNextLessonTime(request))
         }
     }
 

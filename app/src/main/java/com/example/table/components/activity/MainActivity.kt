@@ -21,6 +21,7 @@ import com.example.table.components.fragments.TimeTableFragment
 import com.example.table.di.DaggerViewModelFactory
 import com.example.table.di.components.MainActivityComponent
 import com.example.table.di.modules.ActivityModule
+import com.example.table.model.requests.NextLessonRequest
 import com.example.table.ui.ComposeFragmentContainer
 import com.example.table.ui.FragmentController
 import com.example.table.ui.theme.TableTheme
@@ -45,6 +46,8 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var activityComponent: MainActivityComponent
 
+    lateinit var alarmPendingIntent: PendingIntent
+
 
 
     val fragmentContainerId: Int = View.generateViewId()
@@ -58,6 +61,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        alarmPendingIntent = Intent(this, AlarmReceiver::class.java).let {
+            PendingIntent.getBroadcast(this, 0, it, 0)
+        }
 
         activityComponent = (application as TableApp).appComponent.getMainActivityComponent(
             ActivityModule(this)
@@ -116,15 +123,7 @@ class MainActivity : AppCompatActivity() {
             putBoolean(PRACTICE_NOTIFY_KEY, pair.second)
             apply()
         }
-        val alarmIntent = Intent(this, AlarmReceiver::class.java).let {
-            PendingIntent.getBroadcast(this, 0, it, 0)
-        }
-        val previousAlarm = alarmManager.nextAlarmClock
-        if (previousAlarm != null)
-            alarmManager.cancel(alarmIntent)
-        if (pair.first || pair.second) {
-
-        }
+        viewModel.getNextLessonTime(NextLessonRequest(pair, viewModel.activeGroup.value!!))
     }
 
     fun startTimeTableFragment(){
