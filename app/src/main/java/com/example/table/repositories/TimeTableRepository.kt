@@ -13,8 +13,8 @@ import javax.inject.Inject
 
 class TimeTableRepository @Inject constructor(private val service: ITimeTableService): ITimeTableRepository {
 
-    override suspend fun getTimeTable(timeTableRequest: TimeTableRequest){
-            service.getTimeTable(timeTableRequest)
+    override suspend fun getTimeTable(group: Group, typeSchedule: Int): Group{
+            return service.getTimeTable(group, typeSchedule)
     }
 
     override suspend fun getTimeTableActiveGroup(): List<TimeTableWithLesson> {

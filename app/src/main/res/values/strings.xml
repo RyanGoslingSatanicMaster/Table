@@ -3,4 +3,7 @@
     <string name="pref_file_key">pref_file</string>
     <string name="notif_pract">Включить уведомление  о практиках</string>
     <string name="notife_lect">Включить уведомление  о лекциях</string>
+    <string name="choose_group_number">Введите номер группы</string>
+    <string name="do_active">Сделать эту группу активной?</string>
+    <string name="update_timetable">Расписание этой группы уже сохранено, хотите обновить?</string>
 </resources>

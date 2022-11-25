@@ -80,7 +80,14 @@ class MainActivity : AppCompatActivity() {
         getNotifications()
 
         viewModel.notificationSettings.observe(this){
-            alarmManager.nextAlarmClock
+            if (alarmManager.nextAlarmClock != null)
+                alarmManager.cancel(alarmPendingIntent)
+
+        }
+
+        viewModel.nextLessonTime.observe(this){
+            if (alarmManager.nextAlarmClock != null)
+                alarmManager.cancel(alarmPendingIntent)
         }
 
         onBackPressedDispatcher.addCallback(this){

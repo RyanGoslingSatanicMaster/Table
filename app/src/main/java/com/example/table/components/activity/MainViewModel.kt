@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.table.exceptions.TimeTableIsEmptyException
 import com.example.table.model.LoadingState
 import com.example.table.model.db.Group
 import com.example.table.model.requests.NextLessonRequest
@@ -34,7 +35,12 @@ class MainViewModel @Inject constructor(private val getActiveGroup: IGetActiveGr
 
     fun getNextLessonTime(request: NextLessonRequest){
         viewModelScope.launch {
-            nextLessonTime.postValue(getNextLessonTime.getNextLessonTime(request))
+            try {
+                nextLessonTime.postValue(getNextLessonTime.getNextLessonTime(request))
+            }
+            catch (ex: TimeTableIsEmptyException){
+
+            }
         }
     }
 

@@ -32,6 +32,9 @@ interface TimeTableDao {
     @Query("SELECT * FROM `Group`")
     suspend fun getAllGroup(): List<Group>
 
+    @Query("SELECT * FROM `Group` WHERE groupId LIKE :groupId")
+    suspend fun getGroupById(groupId: Long): Group
+
     @Query("SELECT * FROM `Group` WHERE group_name = :groupName")
     suspend fun getGroupByName(groupName: String): Group
 
@@ -54,6 +57,17 @@ interface TimeTableDao {
         }
     }
 
+    @Transaction
+    suspend fun updateActiveGroup(group: Group): Group{
+        val oldGroup = getGroupByName(group.groupName)
+        if (!oldGroup.isActive && group.isActive) {
+            deactivateAllGroup()
+            updateGroup(oldGroup.copy(isActive = true))
+            return oldGroup.copy(isActive = true)
+        }
+        else
+            return oldGroup
+    }
     /** Teacher */
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -220,9 +234,12 @@ interface TimeTableDao {
     }
 
     @Transaction
-    suspend fun saveAllTimeTableWithLesson(list: List<TimeTableWithLesson>){
+    suspend fun saveAllTimeTableWithLesson(list: List<TimeTableWithLesson>): Group?{
         list.forEach {
             saveTimeTableWithLesson(it)
+        }
+        return list.get(0).let {
+            getGroupByName(it.lesson.group!!.groupName)
         }
     }
 

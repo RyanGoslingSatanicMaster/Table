@@ -24,9 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.table.R
 import com.example.table.components.activity.MainActivity
 import com.example.table.components.activity.MainViewModel
 import com.example.table.di.DaggerViewModelFactory
@@ -65,8 +67,20 @@ class GroupSelectionFragment @Inject constructor() : Fragment() {
     @Composable
     fun GroupSelectionLayout(){
         val text = remember { mutableStateOf("") }
+        val clickedGroup = remember { mutableStateOf<Group?>(null) }
         val loading = viewModel.loading.observeAsState()
-        groupInput(text = text, visibleTextField = loading.value is LoadingState.Stopped || loading.value is LoadingState.Error)
+        groupInput(
+            text = text.value,
+            visibleTextField = loading.value is LoadingState.Stopped || loading.value is LoadingState.Error,
+            onItemClick = {
+                clickedGroup.value = it
+                viewModel.checkClickedGroup(it)
+            },
+            onTextChanged = {
+                text.value = it
+                viewModel.updateGroupList(it)
+            }
+        )
         progressBar(visible = loading.value is LoadingState.Loading)
         when(loading.value){
             is LoadingState.Error -> (loading.value as LoadingState.Error).ex.let {
@@ -75,54 +89,75 @@ class GroupSelectionFragment @Inject constructor() : Fragment() {
                     onConfirm = {
                         when(it){
                             is ExecuteGroupException -> viewModel.updateGroupList(text.value)
-                            is ExecuteTimeTableException -> viewModel.checkClickedGroup(activityViewModel.activeGroup.value!!)
+                            is ExecuteTimeTableException -> if (clickedGroup.value != null )
+                                viewModel.checkClickedGroup(clickedGroup.value!!)
                         }
                         viewModel.loading.value = LoadingState.Stopped
                     }
                 )
             }
             is LoadingState.Success -> {
-                (loading.value as LoadingState.Success).tag.let {
-                    when(it){
+                (loading.value as LoadingState.Success).tag.let { tag ->
+                    when(tag){
                         Constant.ACTIVE_ALREADY_EXIST_IN_DB -> showDialog(
-                            text = Constant.UPDATE_TIMETABLE,
+                            text = stringResource(R.string.update_timetable),
                             onConfirm = {
-                                viewModel.updateGroup(activityViewModel.activeGroup.value!!)
+                                clickedGroup.value?.let {
+                                    viewModel.updateGroupTimeTable(it) {
+                                        activityViewModel.activeGroup.postValue(it)
+                                    }
+                                }
                             },
                             onDismiss = {
                                 (activity as MainActivity).startTimeTableFragment()
                             }
                         )
-                        Constant.INACTIVE_ALREADY_EXIST_IN_DB -> {
-                            showDialog(
-                                text = Constant.DO_ACTIVE,
-                                onConfirm = {
-                                    val actGroup = activityViewModel.activeGroup.value
-                                    activityViewModel.activeGroup.value = Group(actGroup!!.groupId, actGroup!!.groupName, true)
-                                    viewModel.loading.value = LoadingState.Success(Constant.ACTIVE_ALREADY_EXIST_IN_DB)
-                                },
-                                onDismiss = {
+                        Constant.INACTIVE_ALREADY_EXIST_IN_DB -> showDialog(
+                            text = stringResource(R.string.do_active),
+                            onConfirm = {
+                                clickedGroup.value?.let {
+                                    val newGroup = it.copy(isActive = true)
+                                    viewModel.updateGroup(newGroup){group ->
+                                        activityViewModel.activeGroup.postValue(group)
+                                    }
+                                    clickedGroup.value = newGroup
+                                }
+                                viewModel.loading.value = LoadingState.Success(Constant.ACTIVE_ALREADY_EXIST_IN_DB)
+                            },
+                            onDismiss = {
+                                clickedGroup.value?.let {
                                     viewModel.loading.value = LoadingState.Success(Constant.ACTIVE_ALREADY_EXIST_IN_DB)
                                 }
-                            )
-                        }
-                        Constant.NOT_EXIST_IN_DB -> {
-                            showDialog(text = Constant.DO_ACTIVE,
-                                onConfirm = {
-                                    val actGroup = Group(
-                                        activityViewModel.activeGroup.value!!.groupId,
-                                        activityViewModel.activeGroup.value!!.groupName,
-                                        true)
-                                    activityViewModel.activeGroup.value = actGroup
-                                    viewModel.executeAndSaveGroupTimeTable(group = actGroup)
-                                },
-                                onDismiss = {
-                                    viewModel.executeAndSaveGroupTimeTable(activityViewModel.activeGroup.value!!)
+                            }
+                        )
+                        Constant.NOT_EXIST_IN_DB -> showDialog(text = stringResource(R.string.do_active),
+                            onConfirm = {
+                                clickedGroup.value?.let {
+                                    viewModel.executeAndSaveGroupTimeTable(group = it.copy(isActive = true)) {
+                                        activityViewModel.activeGroup.postValue(
+                                            it
+                                        )
+                                    }
                                 }
-                            )
+                            },
+                            onDismiss = {
+                                clickedGroup.value?.let {
+                                    viewModel.executeAndSaveGroupTimeTable(group = it.copy(isActive = false)) {
+                                        activityViewModel.activeGroup.postValue(
+                                            it
+                                        )
+                                    }
+                                }
+                            }
+                        )
+                        Constant.SUCCESS_TIMETABLE_UPDATE -> {
+                            (activity as MainActivity).startTimeTableFragment()
+                            viewModel.loading.value = LoadingState.Stopped
                         }
-                        Constant.SUCCESS_TIMETABLE_UPDATE -> (activity as MainActivity).startTimeTableFragment()
-                        Constant.SUCCESS_TIMETABLE_EXECUTE -> (activity as MainActivity).startTimeTableFragment()
+                        Constant.SUCCESS_TIMETABLE_EXECUTE -> {
+                            (activity as MainActivity).startTimeTableFragment()
+                            viewModel.loading.value = LoadingState.Stopped
+                        }
                     }
                 }
             }
@@ -133,18 +168,21 @@ class GroupSelectionFragment @Inject constructor() : Fragment() {
 
     }
 
+    override fun onPause() {
+        super.onPause()
+        viewModel.loading.value = LoadingState.Stopped
+    }
+
     @Composable
-    fun groupInput(text: MutableState<String>, visibleTextField: Boolean){
+    fun groupInput(text: String, visibleTextField: Boolean, onTextChanged: (String) -> Unit, onItemClick: (Group) -> Unit){
         val list = viewModel.groupList.observeAsState()
-        groupLayout(text = text.value,
+        groupLayout(text = text,
             list = list.value!!,
             onTextChanged = {
-                text.value = it
-                viewModel.updateGroupList(it)
+                onTextChanged.invoke(it)
             },
             onItemClick = {
-                activityViewModel.activeGroup.value = it
-                viewModel.checkClickedGroup(it)
+                onItemClick.invoke(it)
             },
             visibleTextField = visibleTextField
         )
@@ -188,7 +226,7 @@ fun textField(text: String, visibleTextField: Boolean, onTextChanged: (String) -
             onValueChange = onTextChanged,
             textStyle = TextStyle(fontSize = 25.sp),
             singleLine = true,
-            placeholder = { Text(text = "Введите номер группы", style = TextStyle(color = Hint)) },
+            placeholder = { Text(text = stringResource(R.string.choose_group_number), style = TextStyle(color = Hint)) },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = Primary,
                 unfocusedBorderColor = Secondary,

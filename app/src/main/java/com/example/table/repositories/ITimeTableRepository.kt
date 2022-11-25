@@ -8,7 +8,7 @@ import com.example.table.model.requests.TimeTableRequest
 import java.util.*
 
 interface ITimeTableRepository {
-    suspend fun getTimeTable(timeTableRequest: TimeTableRequest)
+    suspend fun getTimeTable(group: Group, typeSchedule: Int): Group
     suspend fun getTimeTableActiveGroup(): List<TimeTableWithLesson>
     suspend fun getTimeTableGroup(group: Group): List<TimeTableWithLesson>
     suspend fun getDayTimeTable(groupName: String, isFirstWeek: Boolean, day: String): List<TimeTableWithLesson>

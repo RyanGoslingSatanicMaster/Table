@@ -12,12 +12,11 @@ import javax.inject.Inject
 
 class TimeTableService @Inject constructor(): ITimeTableService, ApiService() {
 
-    override suspend fun getTimeTable(request: TimeTableRequest){
+    override suspend fun getTimeTable(group: Group, typeSchedule: Int): Group{
         return executeAndSave(null, suspend {
-            api.getTimeTable(request.group.groupName, request.typeSchedule)
+            api.getTimeTable(group.groupName, typeSchedule)
         } to {
-            val timeTable = timeTableDeserialization(it.string(), request.group)
-            dao.saveAllTimeTableWithLesson(timeTable)
+            dao.saveAllTimeTableWithLesson(timeTableDeserialization(it.string(), group))
         })
     }
 

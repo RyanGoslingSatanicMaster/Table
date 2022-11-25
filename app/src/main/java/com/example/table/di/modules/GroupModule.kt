@@ -30,5 +30,8 @@ abstract class GroupModule {
     abstract fun providesDeleteGroupUseCase(useCase: DeleteGroupUseCase): IDeleteGroupUseCase
 
     @Binds
-    abstract fun proivdesGetActiveGroupUseCase(useCase:GetActiveGroup): IGetActiveGroup
+    abstract fun providesGetActiveGroupUseCase(useCase:GetActiveGroup): IGetActiveGroup
+
+    @Binds
+    abstract fun providesUpdateGroupUseCase(usecase: UpdateGroup): IUpdateGroup
 }

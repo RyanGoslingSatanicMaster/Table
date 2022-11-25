@@ -12,7 +12,7 @@ import dagger.Module
 abstract class TimeTableModule {
 
     @Binds
-    abstract fun providesUseCase(useCase: TimeTableUseCase): ITimeTableUseCase
+    abstract fun providesUseCase(useCase: ExecuteAndSaveTimeTable): IExecuteAndSaveTimeTable
 
     @Binds
     abstract fun providesRepository(repository: TimeTableRepository): ITimeTableRepository

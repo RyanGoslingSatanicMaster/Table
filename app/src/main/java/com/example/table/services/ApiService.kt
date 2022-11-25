@@ -26,23 +26,29 @@ open class ApiService @Inject constructor() {
      * 1. Execute from remote
      * 2. If success, Save Local
      */
-    suspend fun <ReturnType> executeAndSave(loadingStateKey: Pair<String, String>? = null, pair: Pair<suspend () -> Response<ReturnType>, suspend (ReturnType) -> Unit>){
+    suspend fun <ReturnType, Result> executeAndSave(
+        loadingStateKey: Pair<String, String>? = null,
+        pair: Pair<suspend () -> Response<ReturnType>, suspend (ReturnType) -> Result?>
+    ): Result{
         execute(loadingStateKey?.first, pair.first).let {
-            saveLocal(loadingStateKey?.second, pair.second, it)
+            return saveLocal(loadingStateKey?.second, pair.second, it)
         }
     }
 
-    @Throws(Exception::class)
-    suspend fun <ReturnType> saveLocal(loadingStateKey: String? = null, request: suspend (ReturnType) -> Unit, data: ReturnType){
+    @Throws(Exception::class, RoomResponseException::class)
+    suspend fun <ReturnType, Result> saveLocal(loadingStateKey: String? = null, request: suspend (ReturnType) -> Result?, data: ReturnType): Result{
         val loadingState = getLoadingState(loadingStateKey)
         loadingState?.postValue(true)
         try {
-            request.invoke(data)
+            val result = request.invoke(data)
+            if (result != null) {
+                return result
+            }
+            throw RoomResponseException("Data not saved")
         } catch (ex: Exception) {
             loadingState?.postValue(false)
             throw ex
         }
-        loadingState?.postValue(false)
     }
 
     suspend fun <ReturnType> executeRemoteOrLocal(

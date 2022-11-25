@@ -11,8 +11,6 @@ object Constant {
     const val CANCEL = "Отмена"
     const val YES = "Да"
     const val NO = "Нет"
-    const val UPDATE_TIMETABLE = "Расписание этой группы уже сохранено, хотите обновить?"
-    const val DO_ACTIVE = "Сделать эту группу активной?"
     const val TAG_COMPOSE = "******COMPOSED"
     const val TAG_LIST = "******LIST"
     const val TAG_INDEX = "******INDEX"
