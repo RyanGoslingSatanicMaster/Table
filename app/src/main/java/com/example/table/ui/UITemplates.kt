@@ -114,6 +114,7 @@ fun AnimatedBackgroundGradient(
     duration: Int,
     topPosition: Boolean = true,
     padding: Dp = 0.dp,
+    isNightMode: Boolean = false,
     innerElement: @Composable (PositionState, Boolean) -> Unit = { a, b ->
     }
 ){
@@ -177,6 +178,7 @@ fun AnimatedBackgroundGradient(
             itemWidthPx = itemWidthPx,
             gradientWidth = gradientWidth,
             padding = padding,
+            isNightMode = isNightMode,
             innerElement = innerElement
         )
     }
@@ -192,6 +194,7 @@ fun SlideAnimatedContent(
     itemWidthPx: Float,
     gradientWidth: Float,
     padding: Dp,
+    isNightMode: Boolean,
     innerElement: @Composable (PositionState, Boolean) -> Unit){
 
     // COLOR ANIMATION
@@ -250,7 +253,8 @@ fun SlideAnimatedContent(
         padding = padding,
         innerElement = innerElement,
         positionTop = positionTop,
-        position = positionState
+        position = positionState,
+        isNightMode = isNightMode
     )
 }
 
@@ -263,6 +267,7 @@ fun shimmerRecipeItem(
     xShimmer: Float,
     yShimmer: Float,
     gradientWidth: Float,
+    isNightMode: Boolean,
     padding: Dp,
     innerElement: @Composable (PositionState, Boolean) -> Unit
 ){
@@ -277,7 +282,11 @@ fun shimmerRecipeItem(
         .background(brush)){
         val positionState by remember{ derivedStateOf { position.value } }
         val isTop by remember{ derivedStateOf { positionTop.value } }
-        cloudsAnimation(visible = isTop, Modifier)
+        if (isNightMode)
+            starAnimation(visible = isTop)
+        else
+            cloudsAnimation(visible = isTop)
+
         wheatAnimation(visible = !isTop, Modifier)
         innerElement(positionState, isTop)
     }
@@ -298,12 +307,13 @@ fun wheatAnimation(visible: Boolean, modifier: Modifier){
     ) {
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.wheat))
         LottieAnimation(composition, alignment = Alignment.BottomStart, modifier = modifier
-            .fillMaxSize().clip(RectangleShape))
+            .fillMaxSize()
+            .clip(RectangleShape))
     }
 }
 
 @Composable
-fun cloudsAnimation(visible: Boolean, modifier: Modifier){
+fun cloudsAnimation(visible: Boolean){
     AnimatedVisibility(visible = visible,
         enter = slideInVertically(animationSpec = tween(durationMillis = 1600))
                 + fadeIn(animationSpec = tween(durationMillis = 1600)),
@@ -320,7 +330,7 @@ fun cloudsAnimation(visible: Boolean, modifier: Modifier){
 }
 
 @Composable
-fun StarAnimation(visible: Boolean){
+fun starAnimation(visible: Boolean){
     AnimatedVisibility(visible = visible,
         enter = slideInVertically(animationSpec = tween(durationMillis = 1600))
                 + fadeIn(animationSpec = tween(durationMillis = 1600)),
@@ -328,7 +338,7 @@ fun StarAnimation(visible: Boolean){
                 + fadeOut(animationSpec = tween(durationMillis = 1000))
     ) {
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.starw))
-        LottieAnimation(composition, alignment = Alignment.TopEnd, modifier = Modifier
+        LottieAnimation(composition, alignment = Alignment.TopCenter, modifier = Modifier
             .fillMaxWidth()
             .clip(
                 RectangleShape

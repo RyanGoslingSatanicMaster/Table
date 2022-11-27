@@ -2,12 +2,14 @@ package com.example.table.di.modules
 
 import android.app.Application
 import android.content.Context
+import com.example.table.annotations.DayNightMode
 import com.example.table.annotations.DayWeek
 import com.example.table.components.TableApp
 import com.example.table.datasource.remote.Api
 import com.example.table.model.db.Group
 import com.example.table.model.pojo.GroupWrapper
 import com.example.table.utils.Constant
+import com.example.table.utils.ConverterUtils
 import com.example.table.utils.UnsafeOkHttpClient
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -60,6 +62,18 @@ class ApplicationModule  {
 
     @Provides
     fun providesCurrentDay() = Date()
+
+    @Provides
+    @DayNightMode
+    fun provideDayNightMode(date: Date): Boolean{
+        val cal = Calendar.getInstance()
+        cal.set(Calendar.YEAR, date.year)
+        cal.set(Calendar.MONTH, date.month)
+        cal.set(Calendar.DATE, date.date)
+        cal.set(Calendar.HOUR, 18)
+        cal.set(Calendar.MINUTE, 0)
+        return date.after(cal.time)
+    }
 
     @Provides
     fun providesContext(): Context{

@@ -12,5 +12,7 @@ val yellow = Color(0xFFEBF881)
 val blue = Color(0xFF528CBD)
 val lightBlue = Color(0xFF66B0EE)
 val extraLightBlue = Color(0xFF69A1CF)
+val darkBlue = Color(0xFF204D74)
+val extraDarkBlue = Color(0xFF133955)
 
 val black = Color(0xFF201E1E)

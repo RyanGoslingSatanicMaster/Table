@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.table.R
+import com.example.table.annotations.DayNightMode
 import com.example.table.components.fragments.GroupSelectionFragment
 import com.example.table.components.TableApp
 import com.example.table.components.broadcasts.AlarmReceiver
@@ -28,6 +29,7 @@ import com.example.table.ui.FragmentController
 import com.example.table.ui.theme.TableTheme
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.properties.Delegates
 
 class MainActivity : AppCompatActivity() {
 

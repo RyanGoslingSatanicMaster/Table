@@ -35,6 +35,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.table.R
+import com.example.table.annotations.DayNightMode
 import com.example.table.components.activity.MainActivity
 import com.example.table.components.activity.MainViewModel
 import com.example.table.di.DaggerViewModelFactory
@@ -46,10 +47,8 @@ import com.example.table.ui.theme.*
 import com.example.table.utils.ConverterUtils
 import javax.inject.Inject
 
-class TimeTableFragment @Inject constructor() : Fragment() {
+class TimeTableFragment @Inject constructor(@DayNightMode val isNightMode: Boolean, val factory: DaggerViewModelFactory) : Fragment() {
 
-    @Inject
-    lateinit var factory: DaggerViewModelFactory
 
     private lateinit var viewModel: TimeTableViewModel
 
@@ -64,7 +63,7 @@ class TimeTableFragment @Inject constructor() : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 TableTheme {
-                    TimeTableLayout()
+                    TimeTableLayout(isNightMode)
                 }
             }
         }
@@ -83,7 +82,7 @@ class TimeTableFragment @Inject constructor() : Fragment() {
     }
 
     @Composable
-    fun TimeTableLayout(){
+    fun TimeTableLayout(isNightMode: Boolean){
         val list = viewModel.timeTable.observeAsState()
         if (list.value != null) {
 
@@ -96,8 +95,9 @@ class TimeTableFragment @Inject constructor() : Fragment() {
                     modifier = Modifier.align(Alignment.BottomEnd))
                 AnimatedBackgroundGradient(
                     duration = 1200,
-                    colors = blue to lightBlue,
-                    topPosition = list.value!!.first.isCurrent
+                    colors = if (!isNightMode) blue to lightBlue else extraDarkBlue to darkBlue,
+                    topPosition = list.value!!.first.isCurrent,
+                    isNightMode = isNightMode
                 ) { position, isTop ->
                     Crossfade(targetState = isTop) {
                         val startIndex by remember {
@@ -117,7 +117,8 @@ class TimeTableFragment @Inject constructor() : Fragment() {
                             fullTimeTable = if (it) list.value!!.first else list.value!!.second,
                             positionState = position,
                             isFirstWeek = it,
-                            startIndex = startIndex
+                            startIndex = startIndex,
+                            isNightMode = isNightMode
                         )
                     }
 
@@ -182,7 +183,7 @@ fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -
 }
 
 @Composable
-fun ShowTimeTable(fullTimeTable: WeekTimeTable, positionState: PositionState, isFirstWeek: Boolean, startIndex: Int){
+fun ShowTimeTable(fullTimeTable: WeekTimeTable, positionState: PositionState, isFirstWeek: Boolean, startIndex: Int, isNightMode: Boolean){
     if (fullTimeTable == null || fullTimeTable.days.isEmpty()){
         AnimatedVisibility(
             visible = true,
