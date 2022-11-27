@@ -319,6 +319,23 @@ fun cloudsAnimation(visible: Boolean, modifier: Modifier){
     }
 }
 
+@Composable
+fun StarAnimation(visible: Boolean){
+    AnimatedVisibility(visible = visible,
+        enter = slideInVertically(animationSpec = tween(durationMillis = 1600))
+                + fadeIn(animationSpec = tween(durationMillis = 1600)),
+        exit = slideOutVertically(animationSpec = tween(durationMillis = 1000))
+                + fadeOut(animationSpec = tween(durationMillis = 1000))
+    ) {
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.starw))
+        LottieAnimation(composition, alignment = Alignment.TopEnd, modifier = Modifier
+            .fillMaxWidth()
+            .clip(
+                RectangleShape
+            ))
+    }
+}
+
 fun Modifier.drawColoredShadow(
     color: Color,
     alpha: Float = 0.2f,

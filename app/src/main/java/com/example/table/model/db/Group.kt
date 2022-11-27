@@ -12,7 +12,7 @@ import java.lang.reflect.Type
 import java.util.*
 
 @Entity(indices = [
-    Index(value = ["group_name", "date_of_first_week"], unique = true)
+    Index(value = ["group_name"], unique = true)
 ])
 data class Group(
     @PrimaryKey(autoGenerate = true)

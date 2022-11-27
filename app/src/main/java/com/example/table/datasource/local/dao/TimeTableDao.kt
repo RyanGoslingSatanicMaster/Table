@@ -112,11 +112,14 @@ interface TimeTableDao {
     @Query("DELETE FROM lesson WHERE lessonId IN (:lessonIds)")
     suspend fun deleteLessonsById(lessonIds: List<Long>)
 
-    @Query("SELECT lessonId FROM lesson WHERE lesson_name LIKE :lessonName AND is_lection LIKE :isLection")
-    suspend fun getLessonId(lessonName: String, isLection: Int): Long
+    @Query("SELECT lessonId FROM lesson WHERE lesson_name LIKE :lessonName AND is_lection LIKE :isLection AND `group` LIKE :groupId")
+    suspend fun getLessonId(lessonName: String, isLection: Int, groupId: Long): Long
 
     @Query("SELECT lessonId FROM lesson WHERE `group` LIKE :groupId")
     suspend fun getLessonIdByGroupId(groupId: Long): List<Long>
+
+    @Query("SELECT * FROM lesson WHERE `group` LIKE :groupId")
+    suspend fun getLessonByGroupId(groupId: Long): List<Lesson>
 
     @Query("SELECT * FROM lesson")
     suspend fun getAllLesson(): List<Lesson>
@@ -128,7 +131,7 @@ interface TimeTableDao {
             if (withUpdate)
                 updateLesson(lesson).toLong()
             else
-                getLessonId(lesson.lessonName, if (lesson.isLection) 1 else 0)
+                getLessonId(lesson.lessonName, if (lesson.isLection) 1 else 0, lesson.group)
         else
             id
     }
@@ -211,7 +214,6 @@ interface TimeTableDao {
     @Transaction
     suspend fun getTimeTable(groupId: Long): List<TimeTableWithLesson>{
        val Ids = getLessonIdByGroupId(groupId)
-        println(getTimeTableByGroupId(4))
         return getTimeTableByLessonId(Ids)
     }
 

@@ -6,7 +6,11 @@ import androidx.room.ForeignKey.CASCADE
 import com.google.gson.annotations.SerializedName
 import java.util.*
 
-@Entity(foreignKeys = [
+@Entity(indices = [
+        Index(value = ["cabinet", "time", "lesson", "is_first_week"],
+            unique = true
+    )],
+    foreignKeys = [
     ForeignKey(entity = Lesson::class,
         parentColumns = ["lessonId"],
         childColumns = ["lesson"],

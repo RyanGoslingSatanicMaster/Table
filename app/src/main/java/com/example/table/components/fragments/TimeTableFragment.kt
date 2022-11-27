@@ -142,11 +142,15 @@ fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -
         Icon(
             modifier = modifier
                 .defaultMinSize(minHeight = 50.dp, minWidth = 50.dp)
-                .padding(4.dp).graphicsLayer(alpha = 0.99f)
+                .padding(4.dp)
+                .graphicsLayer(alpha = 0.99f)
                 .drawWithCache {
                     onDrawWithContent {
                         drawContent()
-                        drawRect(Brush.linearGradient(listOf(Secondary, Primary)), blendMode = BlendMode.SrcAtop)
+                        drawRect(
+                            Brush.linearGradient(listOf(Secondary, Primary)),
+                            blendMode = BlendMode.SrcAtop
+                        )
                     }
                 }
                 .clickable {
@@ -157,11 +161,15 @@ fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -
         )
         Icon(modifier = modifier
             .defaultMinSize(minHeight = 50.dp, minWidth = 50.dp)
-            .padding(4.dp).graphicsLayer(alpha = 0.99f)
+            .padding(4.dp)
+            .graphicsLayer(alpha = 0.99f)
             .drawWithCache {
                 onDrawWithContent {
                     drawContent()
-                    drawRect(Brush.linearGradient(listOf(Secondary, Primary)), blendMode = BlendMode.SrcAtop)
+                    drawRect(
+                        Brush.linearGradient(listOf(Secondary, Primary)),
+                        blendMode = BlendMode.SrcAtop
+                    )
                 }
             }
             .clickable {
@@ -175,7 +183,18 @@ fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -
 
 @Composable
 fun ShowTimeTable(fullTimeTable: WeekTimeTable, positionState: PositionState, isFirstWeek: Boolean, startIndex: Int){
-    println(fullTimeTable)
+    if (fullTimeTable == null || fullTimeTable.days.isEmpty()){
+        AnimatedVisibility(
+            visible = true,
+            enter = slideInVertically(animationSpec = tween(1200)) + fadeIn(animationSpec = tween(1200)),
+            exit = slideOutHorizontally(animationSpec = tween(1200)) + fadeOut(animationSpec = tween(1200))
+        ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                Text(text = "На этой неделе пар нету!", style = Typography.h1, color = Color.White)
+            }
+        }
+        return
+    }
     val currentIndex = remember(isFirstWeek) { mutableStateOf(
         startIndex
     ) }
