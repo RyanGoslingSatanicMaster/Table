@@ -16,4 +16,12 @@ data class Teacher(
     val teacherName: String,
     @ColumnInfo(name = "url")
     val url: String
-)
+){
+    override fun equals(other: Any?): Boolean {
+        return if (other is Teacher)
+            teacherName == other.teacherName &&
+            url == other.url
+        else
+            false
+    }
+}

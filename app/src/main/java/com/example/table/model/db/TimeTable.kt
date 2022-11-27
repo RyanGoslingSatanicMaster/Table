@@ -25,4 +25,13 @@ data class TimeTable(
     val lessonId: Long? = null,
     @ColumnInfo(name = "is_first_week")
     val isFirstWeek: Boolean,
-)
+){
+    override fun equals(other: Any?): Boolean {
+        return if (other is TimeTable)
+            cabinet == other.cabinet &&
+            time == other.time &&
+            isFirstWeek == other.isFirstWeek
+        else
+            false
+    }
+}

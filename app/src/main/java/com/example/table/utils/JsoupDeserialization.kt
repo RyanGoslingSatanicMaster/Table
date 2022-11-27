@@ -16,12 +16,7 @@ fun timeTableDeserialization(html: String, group: Group): List<TimeTableWithLess
     val doc = Jsoup.parse(html)
     val firstWeek = doc.getElementById("first")
     val secondWeek = doc.getElementById("second")
-    val updatedGroup = Group(
-        groupId = group.groupId,
-        groupName = group.groupName,
-        isActive = group.isActive,
-        dateOfFirstWeek = doc.getElementsByClass("h2-responsive").first()?.getDateOfFirstWeek()
-    )
+    val updatedGroup = group.copy(dateOfFirstWeek = doc.getElementsByClass("h2-responsive").first()?.getDateOfFirstWeek())
     return firstWeek?.timeTableWeek(true, updatedGroup)!!.toMutableList().apply {
         secondWeek?.timeTableWeek(false, updatedGroup)?.let { addAll(it) }
     }

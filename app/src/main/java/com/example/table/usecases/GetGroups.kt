@@ -7,7 +7,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GroupUseCase @Inject constructor(private val repository: IGroupRepository): UseCase<List<Group>, GroupRequest>(), IGroupUseCase {
+class GetGroups @Inject constructor(private val repository: IGroupRepository): UseCase<List<Group>, GroupRequest>(), IGetGroups {
 
     override suspend fun run(p: GroupRequest): List<Group>? {
         return repository.getGroups(p)

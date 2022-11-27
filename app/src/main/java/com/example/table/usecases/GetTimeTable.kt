@@ -1,21 +1,19 @@
 package com.example.table.usecases
 
 import android.os.Build
-import android.util.Log
 import com.example.table.annotations.DayWeek
 import com.example.table.model.pojo.DayTimeTable
 import com.example.table.model.pojo.WeekTimeTable
 import com.example.table.model.db.Group
 import com.example.table.model.pojo.TimeTableWithLesson
 import com.example.table.repositories.ITimeTableRepository
-import com.google.gson.Gson
 import java.time.Duration
 import java.util.*
 import javax.inject.Inject
 
-class GetTimeTableUseCase @Inject constructor(private val repository: ITimeTableRepository,
-                                              @DayWeek private val dayWeek: List<Pair<String, String>>,
-                                              private val currentDate: Date): IGetTimeTableUseCase,
+class GetTimeTable @Inject constructor(private val repository: ITimeTableRepository,
+                                       @DayWeek private val dayWeek: List<Pair<String, String>>,
+                                       private val currentDate: Date): IGetTimeTable,
     UseCase<Pair<WeekTimeTable, WeekTimeTable>, Group>() {
 
     override suspend fun run(p: Group): Pair<WeekTimeTable, WeekTimeTable> {

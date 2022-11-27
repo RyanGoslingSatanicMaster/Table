@@ -22,4 +22,12 @@ data class Lesson(
     val isLection: Boolean,
     @ColumnInfo(name = "group")
     val group: Long
-)
+){
+    override fun equals(other: Any?): Boolean {
+        return if (other is Lesson)
+            lessonName == other.lessonName &&
+            isLection == other.isLection
+        else
+            false
+    }
+}

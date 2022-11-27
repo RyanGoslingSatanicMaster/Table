@@ -40,7 +40,6 @@ class TableDatabaseTest: TestCase() {
         db = Room.inMemoryDatabaseBuilder(context, TableDatabase::class.java).build()
         dao = db.getTimeTableDAO()
         currentDate = Date()
-        writeData()
     }
 
     @After
@@ -48,7 +47,8 @@ class TableDatabaseTest: TestCase() {
 
     }
 
-    fun writeData() = runBlocking {
+    @Test
+    fun writeDataTest() = runBlocking {
         var inputStream: InputStream? = null
         var html: String? = null
         try {
@@ -59,12 +59,23 @@ class TableDatabaseTest: TestCase() {
         }finally {
             inputStream?.close()
         }
-        html?.let {
-            val timeTable = timeTableDeserialization(html, Group(groupName = "ИТ1901", isActive = true, dateOfFirstWeek = currentDate))
-            timeTable.forEach { println(ConverterUtils.formatter.format(it.timeTable.time)) }
-            dao.saveAllTimeTableWithLesson(timeTable)
+
+        val group = Group(groupName = "ИТ1901", isActive = true, dateOfFirstWeek = currentDate)
+        val timeTable = timeTableDeserialization(html!!, group)
+        timeTable.forEach { println(ConverterUtils.formatter.format(it.timeTable.time)) }
+        dao.saveAllTimeTableWithLesson(timeTable)
+        val timeTableFromDB = dao.getGroupTimeTable(group)
+        timeTable.forEachIndexed { index, element ->
+            if (timeTableFromDB[index] != element){
+                println(timeTableFromDB[index])
+                println(element)
+            }
         }
+        assert(timeTable == timeTableFromDB)
+
     }
+
+
 
     @Test
     fun getNextTimeTest()= runBlocking {

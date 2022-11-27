@@ -1,20 +1,16 @@
 package com.example.table.components.fragments
 
-import android.os.Build
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.table.model.pojo.WeekTimeTable
 import com.example.table.model.db.Group
-import com.example.table.usecases.IGetTimeTableUseCase
+import com.example.table.usecases.IGetTimeTable
 import kotlinx.coroutines.launch
-import java.time.Duration
-import java.util.*
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.days
 
 class TimeTableViewModel @Inject constructor(
-    private val getTimeTableUseCase: IGetTimeTableUseCase, private val currentDate: Date) : ViewModel() {
+    private val getTimeTableUseCase: IGetTimeTable) : ViewModel() {
 
     val timeTable = MutableLiveData<Pair<WeekTimeTable, WeekTimeTable>>()
 

@@ -25,6 +25,7 @@ class TimeTableService @Inject constructor(): ITimeTableService, ApiService() {
     }
 
     override suspend fun getTimeTableGroup(group: Group): List<TimeTableWithLesson> {
+        println(dao.getTimeTable(1))
         return dao.getGroupTimeTable(group)
     }
 

@@ -175,13 +175,14 @@ fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -
 
 @Composable
 fun ShowTimeTable(fullTimeTable: WeekTimeTable, positionState: PositionState, isFirstWeek: Boolean, startIndex: Int){
+    println(fullTimeTable)
     val currentIndex = remember(isFirstWeek) { mutableStateOf(
         startIndex
     ) }
     val upgraded = remember {
         mutableStateOf(false)
     }
-    val element = remember(currentIndex) {
+    val element = remember {
         mutableStateOf(fullTimeTable.days.get(currentIndex.value))
     }
     when{
@@ -205,7 +206,7 @@ fun ShowTimeTable(fullTimeTable: WeekTimeTable, positionState: PositionState, is
 
         positionState == PositionState.Current -> {
             upgraded.value = false
-            //element.value = fullTimeTable.days.get(currentIndex.value)
+            element.value = fullTimeTable.days.get(currentIndex.value)
         }
     }
     AnimatedVisibility(

@@ -23,4 +23,21 @@ data class LessonWithTeachers(
         entityColumn = "groupId"
     )
     val group: Group? = null
-)
+){
+    override fun equals(other: Any?): Boolean {
+        return if (other is LessonWithTeachers)
+            lesson == other.lesson &&
+            teachers.compare(other.teachers) &&
+            group == other.group
+        else
+            false
+    }
+
+    fun List<Teacher>.compare(other: List<Teacher>): Boolean{
+        forEach { teacher ->
+            if (other.filter { it == teacher }.isEmpty())
+                return false
+        }
+        return true
+    }
+}

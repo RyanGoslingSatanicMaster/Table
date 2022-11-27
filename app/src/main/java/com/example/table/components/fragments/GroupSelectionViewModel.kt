@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class GroupSelectionViewModel @Inject constructor(
-    val groupUseCase: IGroupUseCase,
+    val groupUseCase: IGetGroups,
     private val timeTableUseCase: IExecuteAndSaveTimeTable,
     private val deleteGroupUseCase: IDeleteGroupUseCase,
     private val isGroupInDbUseCase: IsGroupInDbUseCase,
@@ -29,11 +29,12 @@ class GroupSelectionViewModel @Inject constructor(
 
     // TODO Fix error output
 
-    fun checkClickedGroup(group: Group){
+    fun checkClickedGroup(group: Group, callback: (Group) -> Unit){
         loading.value = LoadingState.Loading
         viewModelScope.launch {
             try {
                 val groupDb = isGroupInDbUseCase.isGroupInDb(group)
+                callback.invoke(groupDb)
                 loading.postValue(LoadingState.Success(
                     if (groupDb.isActive)
                         Constant.ACTIVE_ALREADY_EXIST_IN_DB
@@ -41,6 +42,7 @@ class GroupSelectionViewModel @Inject constructor(
                         Constant.INACTIVE_ALREADY_EXIST_IN_DB
                 ))
             }catch (ex: Exception){
+                callback.invoke(group)
                 loading.postValue(LoadingState.Success(Constant.NOT_EXIST_IN_DB))
             }
         }

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
@@ -88,6 +89,10 @@ class MainActivity : AppCompatActivity() {
         viewModel.nextLessonTime.observe(this){
             if (alarmManager.nextAlarmClock != null)
                 alarmManager.cancel(alarmPendingIntent)
+        }
+
+        viewModel.activeGroup.observe(this){
+            Log.v("ACTIVE_GROUP", it.toString())
         }
 
         onBackPressedDispatcher.addCallback(this){

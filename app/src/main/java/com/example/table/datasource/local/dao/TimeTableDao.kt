@@ -50,9 +50,10 @@ interface TimeTableDao {
             return insertGroup(group)
         }
         else{
-            if (!oldGroup.isActive && group.isActive)
+            if (!oldGroup.isActive && group.isActive) {
                 deactivateAllGroup()
-            updateGroup(group)
+                updateGroup(group)
+            }
             return oldGroup.groupId
         }
     }
@@ -146,6 +147,9 @@ interface TimeTableDao {
     @Query("SELECT * FROM timetable")
     suspend fun getAllTimeTable(): List<TimeTable>
 
+    @Query("SELECT * FROM TimeTable, lesson WHERE TimeTable.'lesson' LIKE lesson.'lessonId' AND lesson.'group' LIKE :groupId")
+    suspend fun getTimeTableByGroupId(groupId: Long): List<TimeTable>
+
     @Query("DELETE FROM timetable WHERE lesson IN (:lessonId)")
     suspend fun deleteTimeTable(lessonId: List<Long>)
 
@@ -207,6 +211,7 @@ interface TimeTableDao {
     @Transaction
     suspend fun getTimeTable(groupId: Long): List<TimeTableWithLesson>{
        val Ids = getLessonIdByGroupId(groupId)
+        println(getTimeTableByGroupId(4))
         return getTimeTableByLessonId(Ids)
     }
 
@@ -247,22 +252,13 @@ interface TimeTableDao {
     suspend fun saveTimeTableWithLesson(timeTableWithLesson: TimeTableWithLesson){
         var groupId =  saveGroup(timeTableWithLesson.lesson.group!!)
         val lessonId = insertLessonWithTeachers(timeTableWithLesson.lesson, groupId = groupId)
-        insertTimeTable(TimeTable(
-            cabinet = timeTableWithLesson.timeTable.cabinet,
-            time = timeTableWithLesson.timeTable.time,
-            lessonId = lessonId,
-            isFirstWeek = timeTableWithLesson.timeTable.isFirstWeek
-        ))
+        insertTimeTable(timeTableWithLesson.timeTable.copy(lessonId = lessonId))
     }
 
     @Transaction
     suspend fun insertLessonWithTeachers(lessonWithTeachers: LessonWithTeachers, groupId: Long): Long{
         val lessonId = saveLesson(
-            Lesson(
-                lessonName = lessonWithTeachers.lesson.lessonName,
-                isLection = lessonWithTeachers.lesson.isLection,
-                group = groupId
-        ), false)
+            lessonWithTeachers.lesson.copy(group = groupId), false)
         lessonWithTeachers.teachers.forEach {
             val teacherId = saveTeacher(it, false)
             saveLessonTeacherCrossRef(LessonTeacherCrossRef(lessonId, teacherId), false)

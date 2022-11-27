@@ -21,7 +21,7 @@ abstract class TimeTableModule {
     abstract fun proviesService(service: TimeTableService): ITimeTableService
 
     @Binds
-    abstract fun providesGetUseCase(useCase: GetTimeTableUseCase): IGetTimeTableUseCase
+    abstract fun providesGetUseCase(useCase: GetTimeTable): IGetTimeTable
 
     @Binds
     abstract fun providesGetNextLesson(usecase: GetNextLessonTime): IGetNextLessonTime

@@ -7,7 +7,7 @@ import androidx.lifecycle.LifecycleService
 import com.example.table.components.TableApp
 import com.example.table.di.components.UpdateWidgetServiceComponent
 import com.example.table.usecases.IGetActiveGroup
-import com.example.table.usecases.IGetTimeTableUseCase
+import com.example.table.usecases.IGetTimeTable
 import javax.inject.Inject
 
 class AlarmService : LifecycleService() {
@@ -18,7 +18,7 @@ class AlarmService : LifecycleService() {
     lateinit var getActiveGroup: IGetActiveGroup
 
     @Inject
-    lateinit var getTimeTableUseCase: IGetTimeTableUseCase
+    lateinit var getTimeTableUseCase: IGetTimeTable
 
     override fun onCreate() {
         super.onCreate()

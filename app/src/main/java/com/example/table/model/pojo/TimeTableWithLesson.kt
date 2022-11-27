@@ -17,5 +17,11 @@ data class TimeTableWithLesson(
     @Embedded
     val timeTable: TimeTable,
 ){
-
+    override fun equals(other: Any?): Boolean {
+        return if (other is TimeTableWithLesson)
+            lesson == other.lesson &&
+            timeTable == other.timeTable
+        else
+            false
+    }
 }
