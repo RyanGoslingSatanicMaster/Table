@@ -67,11 +67,10 @@ class ApplicationModule  {
     @DayNightMode
     fun provideDayNightMode(date: Date): Boolean{
         val cal = Calendar.getInstance()
-        cal.set(Calendar.YEAR, date.year)
-        cal.set(Calendar.MONTH, date.month)
-        cal.set(Calendar.DATE, date.date)
-        cal.set(Calendar.HOUR, 18)
+        cal.set(Calendar.AM_PM, Calendar.PM)
+        cal.set(Calendar.HOUR_OF_DAY, 18)
         cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
         return date.after(cal.time)
     }
 

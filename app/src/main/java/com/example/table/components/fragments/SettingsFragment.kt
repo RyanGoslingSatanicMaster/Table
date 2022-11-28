@@ -69,13 +69,15 @@ class SettingsFragment @Inject constructor() : Fragment() {
                 Text(
                     text = "Включить уведомление  о парах",
                     style = Typography.h3, color = Color.Black,
+                    modifier = Modifier.weight(4f)
                 )
                 Switch(
                     checked = settings.value?.first!! || settings.value?.second!!,
                     onCheckedChange = {
                         (activity as MainActivity).setNotifications(it to it)
                     },
-                    colors = SwitchDefaults.colors(checkedThumbColor = Primary, checkedTrackColor = Secondary)
+                    colors = SwitchDefaults.colors(checkedThumbColor = Primary, checkedTrackColor = Secondary),
+                    modifier = Modifier.weight(1f)
                 )
             }
             AnimatedVisibility(
@@ -93,6 +95,7 @@ class SettingsFragment @Inject constructor() : Fragment() {
                         Text(
                             text = stringResource(R.string.notife_lect),
                             style = Typography.h3, color = Color.Black,
+                            modifier = Modifier.weight(4f)
                         )
                         Switch(
                             checked = settings.value?.first!!,
@@ -102,7 +105,8 @@ class SettingsFragment @Inject constructor() : Fragment() {
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Primary,
                                 checkedTrackColor = Secondary
-                            )
+                            ),
+                            modifier = Modifier.weight(1f)
                         )
                     }
                     Row(
@@ -113,6 +117,7 @@ class SettingsFragment @Inject constructor() : Fragment() {
                         Text(
                             text = stringResource(R.string.notif_pract),
                             style = Typography.h3, color = Color.Black,
+                            modifier = Modifier.weight(4f)
                         )
                         Switch(
                             checked = settings.value?.second!!,
@@ -122,7 +127,8 @@ class SettingsFragment @Inject constructor() : Fragment() {
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Primary,
                                 checkedTrackColor = Secondary
-                            )
+                            ),
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }

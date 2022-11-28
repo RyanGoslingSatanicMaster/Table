@@ -47,7 +47,7 @@ import com.example.table.ui.theme.*
 import com.example.table.utils.ConverterUtils
 import javax.inject.Inject
 
-class TimeTableFragment @Inject constructor(@DayNightMode val isNightMode: Boolean, val factory: DaggerViewModelFactory) : Fragment() {
+class TimeTableFragment @Inject constructor(@DayNightMode private val isNightMode: Boolean, private val factory: DaggerViewModelFactory) : Fragment() {
 
 
     private lateinit var viewModel: TimeTableViewModel
@@ -63,7 +63,7 @@ class TimeTableFragment @Inject constructor(@DayNightMode val isNightMode: Boole
         return ComposeView(requireContext()).apply {
             setContent {
                 TableTheme {
-                    TimeTableLayout(isNightMode)
+                    TimeTableLayout()
                 }
             }
         }
@@ -82,7 +82,7 @@ class TimeTableFragment @Inject constructor(@DayNightMode val isNightMode: Boole
     }
 
     @Composable
-    fun TimeTableLayout(isNightMode: Boolean){
+    fun TimeTableLayout(){
         val list = viewModel.timeTable.observeAsState()
         if (list.value != null) {
 
@@ -92,7 +92,7 @@ class TimeTableFragment @Inject constructor(@DayNightMode val isNightMode: Boole
                 },{
                     (activity as MainActivity).startSettingsFragment()
                 },
-                    modifier = Modifier.align(Alignment.BottomEnd))
+                    modifier = Modifier.align(Alignment.BottomEnd), isNightMode)
                 AnimatedBackgroundGradient(
                     duration = 1200,
                     colors = if (!isNightMode) blue to lightBlue else extraDarkBlue to darkBlue,
@@ -131,15 +131,17 @@ class TimeTableFragment @Inject constructor(@DayNightMode val isNightMode: Boole
 }
 
 @Composable
-fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -> Unit = {}, modifier: Modifier){
+fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -> Unit = {}, modifier: Modifier, isNightMode: Boolean){
     Row(
         modifier = modifier
             .background(
                 shape = RoundedCornerShape(topStart = 30.dp),
-                color = Color.White
+                brush = Brush.linearGradient(colors = if (!isNightMode) listOf(Color.White, Color.White) else listOf(
+                    Secondary, lightGreen))
             )
             .zIndex(1f)
     ) {
+        val colors = if (!isNightMode) listOf(Secondary, Primary) else listOf(extraLightBlue, extraDarkBlue)
         Icon(
             modifier = modifier
                 .defaultMinSize(minHeight = 50.dp, minWidth = 50.dp)
@@ -149,7 +151,7 @@ fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -
                     onDrawWithContent {
                         drawContent()
                         drawRect(
-                            Brush.linearGradient(listOf(Secondary, Primary)),
+                            Brush.linearGradient(colors),
                             blendMode = BlendMode.SrcAtop
                         )
                     }
@@ -168,7 +170,7 @@ fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -
                 onDrawWithContent {
                     drawContent()
                     drawRect(
-                        Brush.linearGradient(listOf(Secondary, Primary)),
+                        Brush.linearGradient(colors),
                         blendMode = BlendMode.SrcAtop
                     )
                 }
@@ -234,22 +236,22 @@ fun ShowTimeTable(fullTimeTable: WeekTimeTable, positionState: PositionState, is
         enter = slideInVertically(animationSpec = tween(1200)) + fadeIn(animationSpec = tween(1200)),
         exit = slideOutHorizontally(animationSpec = tween(1200)) + fadeOut(animationSpec = tween(1200))
     ) {
-        ShowCurrentDay(element = element.value, day = element.value.day, isFirstWeek)
+        ShowCurrentDay(element = element.value, day = element.value.day, isFirstWeek, isNightMode)
     }
 }
 
 @Composable
-fun ShowCurrentDay(element: DayTimeTable, day: String, isFirstWeek: Boolean){
+fun ShowCurrentDay(element: DayTimeTable, day: String, isFirstWeek: Boolean, isNightMode: Boolean){
     Column(modifier = Modifier
         .fillMaxSize(), horizontalAlignment = Alignment.Start) {
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(text = day, style = Typography.h1, color = Color.White, modifier = Modifier.padding(10.dp))
-            Text(text = if (isFirstWeek) "1-ая неделя" else "2-я неделя", style = Typography.h1, color = Color.White, modifier = Modifier.padding(10.dp))
+            Text(text = if (isFirstWeek) "1-ая неделя" else "2-я неделя", style = Typography.h3, color = Color.White, modifier = Modifier.padding(10.dp))
         }
         Spacer(modifier = Modifier.height(20.dp))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             element.timeTableList.forEach {
-                ShowTimeTableItem(timeTableWithLesson = it)
+                ShowTimeTableItem(timeTableWithLesson = it, isNightMode)
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }
@@ -257,7 +259,7 @@ fun ShowCurrentDay(element: DayTimeTable, day: String, isFirstWeek: Boolean){
 }
 
 @Composable
-fun ShowTimeTableItem(timeTableWithLesson: TimeTableWithLesson){
+fun ShowTimeTableItem(timeTableWithLesson: TimeTableWithLesson, isNightMode: Boolean){
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -269,7 +271,8 @@ fun ShowTimeTableItem(timeTableWithLesson: TimeTableWithLesson){
                 alpha = 0.6f
             )
             .background(
-                brush = Brush.linearGradient(listOf(darkGreen, lightGreen)),
+                brush = Brush.linearGradient(if (!isNightMode) listOf(Secondary, darkGreen) else listOf(
+                    Secondary, lightGreen)),
                 shape = Shapes.large
             )
             .padding(5.dp),

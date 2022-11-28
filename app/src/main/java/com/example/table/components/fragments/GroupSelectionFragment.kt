@@ -229,8 +229,7 @@ fun textField(text: String, visibleTextField: Boolean, onTextChanged: (String) -
             placeholder = { Text(text = stringResource(R.string.choose_group_number), style = TextStyle(color = Hint)) },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = Primary,
-                unfocusedBorderColor = Secondary,
-                errorBorderColor = yellow
+                unfocusedBorderColor = Secondary
             )
         )
     }
