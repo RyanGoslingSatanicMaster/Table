@@ -1,5 +1,23 @@
 # TimeTable Application for Kuban State Agrarian University
-This is my portfolio project which developed and designed by me. Project was created using Clean Architecture. 
+This is my portfolio project which developed and designed by me.
+
+TimeTable App is most comfortable and powerful application for view your class schedule, if you student of KubSAU of course. Application parse and save schedule information from https://s.kubsau.ru/.
+P.S. KubSAU server haven't convenient API. So, we need to parse Html-code.
+
+
+So, there're some main advantages of TimeTable App:
+
+1. <strong>All data about schedule saves local</strong>
+2. <strong>Custom Design with Day/Night Mode</strong>
+![gif1](https://gith)ub.com/RyanGoslingSatanicMaster/Table/blob/master/ezgif.com-gif-maker%20(1).gif)
+![gif2](https://github.com/RyanGoslingSatanicMaster/Table/blob/master/ezgif.com-gif-maker.gif)
+3. <strong>Widget with schedule</strong>
+![ezgif com-gif-maker (3)](https://user-images.githubusercontent.com/114514667/204233977-d0a27611-336f-437e-b7a3-1e31a466d751.gif)
+4. <strong>Lesson notifications</strong>
+
+<strong>About Development</strong>
+
+Project was created using Clean Architecture. 
 During development, I used the following technologies:
 1. Dependency Injection implemented using Dagger2.
 2. RESTful requests provided by Retrofit2.
