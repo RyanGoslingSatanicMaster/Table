@@ -11,7 +11,7 @@ So, there're some main advantages of TimeTable App:
 
 ![gif1](https://github.com/RyanGoslingSatanicMaster/Table/blob/master/ezgif.com-gif-maker%20(1).gif)
 
-3. <strong>Custom Design with Day/Night Mode</strong>
+2. <strong>Custom Design with Day/Night Mode</strong>
 
 ![gif2](https://github.com/RyanGoslingSatanicMaster/Table/blob/master/ezgif.com-gif-maker.gif)
 
