@@ -8,7 +8,6 @@ P.S. KubSAU server haven't convenient API. So, we need to parse Html-code.
 So, there're some main advantages of TimeTable App:
 
 1. <strong>All schedule data saves LOCAL</strong>
-2. 
 ![gif1](https://github.com/RyanGoslingSatanicMaster/Table/blob/master/ezgif.com-gif-maker%20(1).gif)
 
 3. <strong>Custom Design with Day/Night Mode</strong>
@@ -21,9 +20,9 @@ So, there're some main advantages of TimeTable App:
 
 4. <strong>Lesson notifications</strong>
 
-<strong>About Development</strong>
+## About Development
 
-Project was created using Clean Architecture. 
+Project was created using Clean Architecture. So application can easly scaled, for example become universal.
 During development, I used the following technologies:
 1. Dependency Injection implemented using Dagger2.
 2. RESTful requests provided by Retrofit2.
