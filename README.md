@@ -8,6 +8,7 @@ P.S. KubSAU server haven't convenient API. So, we need to parse Html-code.
 So, there're some main advantages of TimeTable App:
 
 1. <strong>All schedule data saves LOCAL</strong>
+
 ![gif1](https://github.com/RyanGoslingSatanicMaster/Table/blob/master/ezgif.com-gif-maker%20(1).gif)
 
 3. <strong>Custom Design with Day/Night Mode</strong>
