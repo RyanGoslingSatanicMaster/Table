@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:background="@drawable/widget_background"
+    android:padding="10dp"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_marginLeft="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="2">
+        <TextView
+            android:id = "@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:text="11:30"
+            android:textColor="@color/white"
+            />
+        <TextView
+            android:id = "@+id/is_lection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:text="Лекция"
+            android:textColor="@color/white"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="5"
+        >
+        <TextView
+            android:id = "@+id/lesson_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:text="Информационный менеджемент"
+            android:textFontWeight="500"
+            />
+        <TextView
+            android:id="@+id/teachers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:textColor="@color/white"
+            android:text="Лаптев В.Н.\nКосожоп Р.Ф."
+            />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/cabinet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="@color/white"
+        android:layout_weight="5"
+        android:gravity="center_vertical"
+        android:text="305k"
+        />
+
+</LinearLayout>

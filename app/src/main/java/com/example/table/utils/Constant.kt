@@ -7,8 +7,6 @@ object Constant {
     const val SUCCESS_GROUP_EXECUTE = 102
     const val SUCCESS_NOT_ACTIVE_GROUP = 103
     const val TABLE_NOT_UPLOAD = "Поздравляем, у вас нет пар!"
-    const val REPEAT = "Повторить"
-    const val CANCEL = "Отмена"
     const val YES = "Да"
     const val NO = "Нет"
     const val TAG_COMPOSE = "******COMPOSED"
@@ -17,4 +15,5 @@ object Constant {
     const val ACTIVE_ALREADY_EXIST_IN_DB = 400
     const val INACTIVE_ALREADY_EXIST_IN_DB = 401
     const val NOT_EXIST_IN_DB = 402
+    const val SHARED_PREFERENCES_KEY = "TIME_TABLE_PREFERENCE"
 }

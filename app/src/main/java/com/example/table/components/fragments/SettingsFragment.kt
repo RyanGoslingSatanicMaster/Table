@@ -1,11 +1,15 @@
 package com.example.table.components.fragments
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
@@ -22,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import com.example.table.BuildConfig
 import com.example.table.R
 import com.example.table.components.activity.MainActivity
 import com.example.table.components.activity.MainViewModel
@@ -56,6 +62,20 @@ class SettingsFragment @Inject constructor() : Fragment() {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val request = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            }
+            val permission = ActivityCompat.checkSelfPermission(
+                requireActivity(),
+                Manifest.permission.SCHEDULE_EXACT_ALARM
+            )
+            if (permission != PackageManager.PERMISSION_GRANTED)
+                request.launch(Manifest.permission.SCHEDULE_EXACT_ALARM)
+        }
+    }
+
     @Composable
     private fun SettingsLayout(){
         val settings = activityViewModel.notificationSettings.observeAsState()
@@ -73,8 +93,10 @@ class SettingsFragment @Inject constructor() : Fragment() {
                 )
                 Switch(
                     checked = settings.value?.first!! || settings.value?.second!!,
-                    onCheckedChange = {
-                        (activity as MainActivity).setNotifications(it to it)
+                    onCheckedChange = { notify ->
+                        (activity as MainActivity).requestPermission(Manifest.permission.SCHEDULE_EXACT_ALARM){
+                                (activity as MainActivity).setNotifications(Triple(notify, notify, ""))
+                        }
                     },
                     colors = SwitchDefaults.colors(checkedThumbColor = Primary, checkedTrackColor = Secondary),
                     modifier = Modifier.weight(1f)
@@ -99,8 +121,16 @@ class SettingsFragment @Inject constructor() : Fragment() {
                         )
                         Switch(
                             checked = settings.value?.first!!,
-                            onCheckedChange = {
-                                (activity as MainActivity).setNotifications(it to settings.value?.second!!)
+                            onCheckedChange = { notify ->
+                                (activity as MainActivity).requestPermission(Manifest.permission.SCHEDULE_EXACT_ALARM) {
+                                    (activity as MainActivity).setNotifications(
+                                        Triple(
+                                            notify,
+                                            settings.value?.second!!,
+                                            ""
+                                        )
+                                    )
+                                }
                             },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Primary,
@@ -121,8 +151,16 @@ class SettingsFragment @Inject constructor() : Fragment() {
                         )
                         Switch(
                             checked = settings.value?.second!!,
-                            onCheckedChange = {
-                                (activity as MainActivity).setNotifications(settings.value?.first!! to it)
+                            onCheckedChange = { notify ->
+                                (activity as MainActivity).requestPermission(Manifest.permission.SCHEDULE_EXACT_ALARM) {
+                                    (activity as MainActivity).setNotifications(
+                                        Triple(
+                                            settings.value?.first!!,
+                                            notify,
+                                            ""
+                                        )
+                                    )
+                                }
                             },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Primary,

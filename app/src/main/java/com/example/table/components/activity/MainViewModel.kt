@@ -7,10 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.example.table.exceptions.TimeTableIsEmptyException
 import com.example.table.model.LoadingState
 import com.example.table.model.db.Group
+import com.example.table.model.pojo.TimeTableWithLesson
 import com.example.table.model.requests.NextLessonRequest
 import com.example.table.model.requests.TimeTableRequest
 import com.example.table.usecases.*
 import kotlinx.coroutines.launch
+import java.sql.Time
 import java.util.*
 import javax.inject.Inject
 
@@ -19,9 +21,9 @@ class MainViewModel @Inject constructor(private val getActiveGroup: IGetActiveGr
 
     val activeGroup = MutableLiveData<Group>()
 
-    val notificationSettings = MutableLiveData<Pair<Boolean, Boolean>>()
+    val notificationSettings = MutableLiveData<Triple<Boolean, Boolean, String>>()
 
-    val nextLessonTime = MutableLiveData<Date>()
+    val nextLessonTime = MutableLiveData<TimeTableWithLesson>()
 
     fun setGroup(group: Group){
         activeGroup.value = group

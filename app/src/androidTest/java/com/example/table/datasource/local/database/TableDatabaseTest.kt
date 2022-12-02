@@ -62,7 +62,7 @@ class TableDatabaseTest: TestCase() {
 
         val group = Group(groupName = "ИТ1901", isActive = true, dateOfFirstWeek = currentDate)
         val timeTable = timeTableDeserialization(html!!, group)
-        timeTable.forEach { println(ConverterUtils.formatter.format(it.timeTable.time)) }
+        timeTable.forEach { println(ConverterUtils.formatterDate.format(it.timeTable.time)) }
         dao.saveAllTimeTableWithLesson(timeTable)
         val timeTableFromDB = dao.getGroupTimeTable(group)
         timeTable.forEachIndexed { index, element ->

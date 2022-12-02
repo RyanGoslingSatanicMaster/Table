@@ -1,6 +1,5 @@
 package com.example.table.di.components
 
-import com.example.table.components.activity.MainActivity
 import com.example.table.di.modules.*
 import dagger.Component
 import javax.inject.Singleton
@@ -13,6 +12,6 @@ interface ApplicationComponent {
 
     fun getSplashScreenActivityComponent(): SplashScreenActivityComponent
 
-    fun getUpdateWidgetServiceComponent(): UpdateWidgetServiceComponent
+    fun getAlarmServiceComponent(serviceModule: ServiceModule): AlarmServiceComponent
 
 }

@@ -1,6 +1,7 @@
 package com.example.table.utils
 
 import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.table.model.db.Group
 import com.example.table.model.db.Lesson
 import com.example.table.model.db.Teacher
@@ -12,6 +13,7 @@ import org.jsoup.nodes.Element
 import java.util.*
 import kotlin.streams.toList
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun timeTableDeserialization(html: String, group: Group): List<TimeTableWithLesson> {
     val doc = Jsoup.parse(html)
     val firstWeek = doc.getElementById("first")
@@ -23,13 +25,14 @@ fun timeTableDeserialization(html: String, group: Group): List<TimeTableWithLess
 
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun Element.getDateOfFirstWeek(): Date {
     if(this.text().contains("1-ая неделя"))
         return Date()
     else {
         val cal = Calendar.getInstance()
         cal.time = Date()
-        cal.add(Calendar.DATE, 7)
+        cal.add(Calendar.DATE, -7)
         return cal.time
     }
 }
@@ -64,7 +67,7 @@ fun timeTableDay(el: Element, group: Group, isFirstWeek: Boolean): List<TimeTabl
     }
 
     lessonList.forEach {
-        val date = ConverterUtils.formatter.parse(day + ", " + it.getElementsByClass("time").text().substringBefore('<'))
+        val date = ConverterUtils.parseDateWithPrefix(day + ", " + it.getElementsByClass("time").text().substringBefore('<'))
         val lesson = getLesson(it.getElementsByClass("diss").first()!!,
             it.getElementsByClass("yes").first(), group)
         val cabinet = it.getElementsByClass("who-where").first()?.text()

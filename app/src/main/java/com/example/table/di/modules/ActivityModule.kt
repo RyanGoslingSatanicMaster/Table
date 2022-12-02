@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.table.components.activity.MainActivity
+import com.example.table.utils.Constant
 import dagger.Module
 import dagger.Provides
 
@@ -24,7 +25,7 @@ class ActivityModule constructor(private val activity: MainActivity) {
     }
 
     @Provides
-    fun provideSharedPref() = activity.getPreferences(Context.MODE_PRIVATE)
+    fun provideSharedPref() = activity.getSharedPreferences(Constant.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
 
     @Provides
     fun provideAlarmManager() = activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager

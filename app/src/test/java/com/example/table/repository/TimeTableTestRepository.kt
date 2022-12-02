@@ -28,7 +28,8 @@ class TimeTableTestRepository: ITimeTableRepository {
         dataSoure = timeTableDeserialization(html!!, Group(groupName = "ИТ1901", isActive = true, dateOfFirstWeek = Date()))
     }
 
-    override suspend fun getTimeTable(timeTableRequest: TimeTableRequest) {
+    override suspend fun getTimeTable(group: Group, typeSchedule: Int): Group {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getTimeTableActiveGroup(): List<TimeTableWithLesson> {

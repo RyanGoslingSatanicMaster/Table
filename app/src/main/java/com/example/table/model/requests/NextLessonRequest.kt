@@ -4,6 +4,6 @@ import com.example.table.model.db.Group
 import java.util.*
 
 data class NextLessonRequest(
-    val notify: Pair<Boolean, Boolean>,
+    val notify: Triple<Boolean, Boolean, String>,
     val group: Group
 )
