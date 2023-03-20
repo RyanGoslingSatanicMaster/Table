@@ -12,6 +12,4 @@ interface ApplicationComponent {
 
     fun getSplashScreenActivityComponent(): SplashScreenActivityComponent
 
-    fun getAlarmServiceComponent(serviceModule: ServiceModule): AlarmServiceComponent
-
 }

@@ -21,7 +21,7 @@ class MainViewModel @Inject constructor(private val getActiveGroup: IGetActiveGr
 
     val activeGroup = MutableLiveData<Group>()
 
-    val notificationSettings = MutableLiveData<Triple<Boolean, Boolean, String>>()
+    val notificationSettings = MutableLiveData<Triple<Boolean, Boolean, Int>>()
 
     val nextLessonTime = MutableLiveData<TimeTableWithLesson>()
 

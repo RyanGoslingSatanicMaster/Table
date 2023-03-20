@@ -1,15 +1,16 @@
 package com.example.table.di.modules
 
-import android.app.Application
+import android.app.AlarmManager
+import android.app.Service
 import android.content.Context
-import com.example.table.annotations.DayNightMode
+import androidx.work.CoroutineWorker
+import androidx.work.Worker
+import com.example.table.annotations.ApplicationContext
 import com.example.table.annotations.DayWeek
-import com.example.table.components.TableApp
 import com.example.table.datasource.remote.Api
 import com.example.table.model.db.Group
 import com.example.table.model.pojo.GroupWrapper
 import com.example.table.utils.Constant
-import com.example.table.utils.ConverterUtils
 import com.example.table.utils.UnsafeOkHttpClient
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -22,18 +23,19 @@ import retrofit2.create
 import java.util.*
 
 @Module
-class ApplicationModule  {
+class WorkerModule constructor(private val worker: CoroutineWorker) {
 
-    private val app: TableApp
-
-    private lateinit var api: Api
-
-    constructor(app: TableApp){
-        this.app = app
+    @Provides
+    @ApplicationContext
+    fun provideContext(): Context {
+        return worker.applicationContext
     }
 
     @Provides
-    fun provideSharedPref() = app.getSharedPreferences(Constant.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+    fun provideSharedPref() = worker.applicationContext.getSharedPreferences(Constant.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+
+    @Provides
+    fun provideAlarmManager() = worker.applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     @Provides
     fun providesGson() = GsonBuilder()
@@ -65,26 +67,4 @@ class ApplicationModule  {
 
     @Provides
     fun providesCurrentDay() = Date()
-
-    @Provides
-    @DayNightMode
-    fun provideDayNightMode(date: Date): Boolean{
-        val cal = Calendar.getInstance()
-        cal.set(Calendar.AM_PM, Calendar.PM)
-        cal.set(Calendar.HOUR_OF_DAY, 18)
-        cal.set(Calendar.MINUTE, 0)
-        cal.set(Calendar.SECOND, 0)
-        return date.after(cal.time)
-    }
-
-    @Provides
-    fun providesContext(): Context{
-        return app
-    }
-
-    @Provides
-    fun providesApplication(): Application{
-        return app
-    }
-
 }

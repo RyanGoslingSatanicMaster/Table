@@ -2,7 +2,6 @@ package com.example.table.model.db
 
 import androidx.annotation.Nullable
 import androidx.room.*
-import androidx.room.ForeignKey.CASCADE
 import com.google.gson.annotations.SerializedName
 import java.util.*
 

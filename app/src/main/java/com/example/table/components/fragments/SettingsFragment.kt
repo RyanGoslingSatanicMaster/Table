@@ -49,7 +49,7 @@ class SettingsFragment @Inject constructor() : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         viewModel = ViewModelProvider(this, factory).get(SettingsViewModel::class.java)
         activityViewModel = (activity as MainActivity).viewModel
@@ -77,7 +77,7 @@ class SettingsFragment @Inject constructor() : Fragment() {
     }
 
     @Composable
-    private fun SettingsLayout(){
+    private fun SettingsLayout() {
         val settings = activityViewModel.notificationSettings.observeAsState()
         Column(modifier = Modifier
             .fillMaxSize()
@@ -85,7 +85,7 @@ class SettingsFragment @Inject constructor() : Fragment() {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically){
+                verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "Включить уведомление  о парах",
                     style = Typography.h3, color = Color.Black,
@@ -94,11 +94,14 @@ class SettingsFragment @Inject constructor() : Fragment() {
                 Switch(
                     checked = settings.value?.first!! || settings.value?.second!!,
                     onCheckedChange = { notify ->
-                        (activity as MainActivity).requestPermission(Manifest.permission.SCHEDULE_EXACT_ALARM){
-                                (activity as MainActivity).setNotifications(Triple(notify, notify, ""))
+                        (activity as MainActivity).requestPermission(Manifest.permission.SCHEDULE_EXACT_ALARM) {
+                            (activity as MainActivity).setNotifications(Triple(notify,
+                                notify,
+                                settings.value?.third ?: DEFAULT_MINUTE_BEFORE_NOTIFY))
                         }
                     },
-                    colors = SwitchDefaults.colors(checkedThumbColor = Primary, checkedTrackColor = Secondary),
+                    colors = SwitchDefaults.colors(checkedThumbColor = Primary,
+                        checkedTrackColor = Secondary),
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -127,7 +130,7 @@ class SettingsFragment @Inject constructor() : Fragment() {
                                         Triple(
                                             notify,
                                             settings.value?.second!!,
-                                            ""
+                                            settings.value?.third ?: DEFAULT_MINUTE_BEFORE_NOTIFY
                                         )
                                     )
                                 }
@@ -157,7 +160,7 @@ class SettingsFragment @Inject constructor() : Fragment() {
                                         Triple(
                                             settings.value?.first!!,
                                             notify,
-                                            ""
+                                            settings.value?.third ?: DEFAULT_MINUTE_BEFORE_NOTIFY
                                         )
                                     )
                                 }
@@ -174,5 +177,8 @@ class SettingsFragment @Inject constructor() : Fragment() {
         }
     }
 
+    companion object {
+        const val DEFAULT_MINUTE_BEFORE_NOTIFY = 5
+    }
 
 }

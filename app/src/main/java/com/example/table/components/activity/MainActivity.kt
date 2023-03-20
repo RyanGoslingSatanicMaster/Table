@@ -34,6 +34,7 @@ import com.example.table.model.requests.NextLessonRequest
 import com.example.table.ui.ComposeFragmentContainer
 import com.example.table.ui.FragmentController
 import com.example.table.ui.theme.TableTheme
+import com.example.table.utils.PrefUtils
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
@@ -45,7 +46,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var factory: DaggerViewModelFactory
 
     @Inject
-    lateinit var sharedPref: SharedPreferences
+    lateinit var prefUtils: PrefUtils
 
     @Inject
     lateinit var fragmentMap: Map<Class<out Fragment>, @JvmSuppressWildcards(true) Provider<Fragment>>
@@ -67,9 +68,6 @@ class MainActivity : AppCompatActivity() {
     companion object{
         const val NOTIFY_KEY = "NOTIFY_KEY"
         const val ALARM_ACTION = "ALARM_ACTION_TIMETABLE_APP"
-        const val LECTION_NOTIFY_KEY = "LECTION_NOTIFY_KEY"
-        const val PRACTICE_NOTIFY_KEY = "PRACTICE_NOTIFY_KEY"
-        const val TIME_BEFORE_NOTIFY_KEY = "TIME_BEFORE_NOTIFY_KEY"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -172,7 +170,7 @@ class MainActivity : AppCompatActivity() {
             "Разрешение на использование будильника отключено",
             Toast.LENGTH_LONG
         )
-        viewModel.notificationSettings.value = Triple(false, false, "")
+        viewModel.notificationSettings.value = Triple(false, false, 5)
     }
 
     private fun setNewAlarm(nextLessonTime: TimeTableWithLesson){
@@ -195,7 +193,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             if (alarmManager.canScheduleExactAlarms())
-                alarmManager?.setAlarmClock(
+                alarmManager.setAlarmClock(
                     AlarmManager.AlarmClockInfo(
                         System.currentTimeMillis() + (60 * 1000),
                         alarmPendingIntent),
@@ -204,7 +202,7 @@ class MainActivity : AppCompatActivity() {
             else
                 returnNotifySettings()
         else
-            alarmManager?.setAlarmClock(
+            alarmManager.setAlarmClock(
                 AlarmManager.AlarmClockInfo(
                     System.currentTimeMillis() + (60 * 1000),
                     alarmPendingIntent),
@@ -213,19 +211,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getNotifications(){
-        viewModel.notificationSettings.value =
-            Triple(sharedPref.getBoolean(LECTION_NOTIFY_KEY, false),
-                sharedPref.getBoolean(PRACTICE_NOTIFY_KEY, false), sharedPref.getString(
-                    TIME_BEFORE_NOTIFY_KEY, "")!!)
+        viewModel.notificationSettings.value = prefUtils.getNotifications()
     }
 
-    fun setNotifications(pair: Triple<Boolean, Boolean, String>){
+    fun setNotifications(pair: Triple<Boolean, Boolean, Int>){
         viewModel.notificationSettings.value = pair
-        with(sharedPref.edit()){
-            putBoolean(LECTION_NOTIFY_KEY, pair.first)
-            putBoolean(PRACTICE_NOTIFY_KEY, pair.second)
-            apply()
-        }
+        prefUtils.setNotifications(pair)
         viewModel.getNextLessonTime(NextLessonRequest(pair, viewModel.activeGroup.value!!))
     }
 

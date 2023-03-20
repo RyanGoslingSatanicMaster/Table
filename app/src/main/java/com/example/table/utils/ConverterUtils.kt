@@ -29,9 +29,9 @@ class ConverterUtils {
             val cal = Calendar.getInstance()
             cal.time = getFirstDayOfWeek(date)
             val cal2 = Calendar.getInstance()
-            cal2.time = currentDate
+            cal2.time = getFirstDayOfWeek(currentDate)
             val daysBetween = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Duration.between(cal.toInstant(), cal2.toInstant()).toDays()
+                Duration.between(cal.toInstant(), cal2.toInstant()).toDays() + 1
             } else {
                 Math.abs((cal2.timeInMillis)/60/60/24 - (cal2.timeInMillis)/60/60/24)
             }
@@ -40,14 +40,15 @@ class ConverterUtils {
 
         fun getFirstDayOfWeek(date: Date): Date{
             val cal = Calendar.getInstance()
+            cal.time = date
             when(date.day){
-                0 -> cal.set(date.year, date.month, date.date - 6)
+                0 -> cal.add(Calendar.DATE, -6)
                 1 -> return date
-                2 -> cal.set(date.year, date.month, date.date - 1)
-                3 -> cal.set(date.year, date.month, date.date - 2)
-                4 -> cal.set(date.year, date.month, date.date - 3)
-                5 -> cal.set(date.year, date.month, date.date - 4)
-                6 -> cal.set(date.year, date.month, date.date - 5)
+                2 -> cal.add(Calendar.DATE, -1)
+                3 -> cal.add(Calendar.DATE, -2)
+                4 -> cal.add(Calendar.DATE, -3)
+                5 -> cal.add(Calendar.DATE, -4)
+                6 -> cal.add(Calendar.DATE, -5)
             }
             return cal.time
         }

@@ -25,8 +25,5 @@ class ActivityModule constructor(private val activity: MainActivity) {
     }
 
     @Provides
-    fun provideSharedPref() = activity.getSharedPreferences(Constant.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
-
-    @Provides
     fun provideAlarmManager() = activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 }
