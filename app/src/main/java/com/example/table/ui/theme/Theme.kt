@@ -1,10 +1,19 @@
 package com.example.table.ui.theme
 
+import android.app.Activity
+import android.content.ContentResolver
+import android.provider.Settings
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.ViewCompat
+
 
 private val DarkColorPalette = darkColors(
     primary = Primary,
@@ -34,6 +43,13 @@ fun TableTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable 
     } else {
         LightColorPalette
     }
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            (view.context as Activity).window.statusBarColor = Color.Transparent.toArgb()
+            ViewCompat.getWindowInsetsController(view)?.isAppearanceLightStatusBars = darkTheme
+        }
+    }
 
     MaterialTheme(
         colors = colors,
@@ -41,4 +57,8 @@ fun TableTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable 
         shapes = Shapes,
         content = content
     )
+}
+
+fun isGestureNavigationMode(content: ContentResolver?): Boolean {
+    return Settings.Secure.getInt(content, "navigation_mode", 0) === 2
 }

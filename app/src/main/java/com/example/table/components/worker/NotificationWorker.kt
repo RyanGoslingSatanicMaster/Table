@@ -1,6 +1,7 @@
 package com.example.table.components.worker
 
 import android.app.*
+import android.app.Notification.DEFAULT_SOUND
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -22,6 +23,7 @@ import com.example.table.di.modules.ApplicationModule
 import com.example.table.di.modules.RoomModule
 import com.example.table.di.modules.WorkerModule
 import com.example.table.model.db.Group
+import com.example.table.model.db.Teacher
 import com.example.table.model.pojo.TimeTableWithLesson
 import com.example.table.model.requests.NextLessonRequest
 import com.example.table.usecases.GetNextLessonTime
@@ -60,8 +62,13 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
 
         val settings = prefUtils.getNotifications()
         var lesson: TimeTableWithLesson? = null
-        var testTime = Calendar.getInstance()
-        for (i in 0..prefUtils.getTestKeyTime()) {
+        var currentTime = Calendar.getInstance()
+        lesson = try {
+            getNextLessonTime.getNextLessonTime(NextLessonRequest(settings, group, currentTime.time))
+        } catch (ex: java.lang.Exception) {
+            return Result.retry()
+        }
+        /*for (i in 0..prefUtils.getTestKeyTime()) {
             testTime.add(Calendar.MINUTE, settings.third)
             lesson = try {
                 getNextLessonTime.getNextLessonTime(NextLessonRequest(settings, group, testTime.time))
@@ -70,7 +77,7 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
             }
             testTime.time = lesson?.timeTable?.time!!
         }
-        prefUtils.incTestKey()
+        prefUtils.incTestKey()*/
         showNotification(lesson!!)
 
         setNextNotification(group, settings)
@@ -94,7 +101,11 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
             .setAutoCancel(true)
-            .setContent(createNotificationView(lesson))
+            .setCustomContentView(createCollapsedNotificationView(lesson))
+            .setCustomBigContentView(createCustomNotificationView(lesson))
+            .setCustomHeadsUpContentView(createCollapsedNotificationView(lesson))
+            .setDefaults(DEFAULT_SOUND)
+            .setPriority(Notification.PRIORITY_MAX)
         val notification = builder.build()
         notification.flags.or(Notification.FLAG_AUTO_CANCEL)
         val mNotificationManager =
@@ -102,7 +113,7 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             val channel = NotificationChannel(CHANNEL_ID,
-                "TimeTableAppChannel",
+                "Уведомления о парах",
                 NotificationManager.IMPORTANCE_DEFAULT)
             mNotificationManager.createNotificationChannel(channel)
 
@@ -112,18 +123,21 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
         }
     }
 
-    fun createNotificationView(lesson: TimeTableWithLesson): RemoteViews{
-        val teacherString = ""
-        lesson.lesson.teachers.forEach {
-            teacherString.plus(it.teacherName)
-        }
-        val remoteView = RemoteViews(applicationContext.packageName, R.layout.notification_item)
-        remoteView.setTextViewText(R.id.time, ConverterUtils.formatterTime.format(lesson.timeTable.time))
-        remoteView.setTextViewText(R.id.is_lection, if (lesson.lesson.lesson.isLection) "Лекция" else "Практика")
-        remoteView.setTextViewText(R.id.lesson_name, lesson.lesson.lesson.lessonName)
-        remoteView.setTextViewText(R.id.cabinet, lesson.timeTable.cabinet)
-        remoteView.setTextViewText(R.id.teachers, teacherString)
-        return remoteView
+    fun createCustomNotificationView(lesson: TimeTableWithLesson): RemoteViews{
+        val expanded = RemoteViews(applicationContext.packageName, R.layout.notification_expanded)
+        expanded.setTextViewText(R.id.time_lesson, ConverterUtils.formatterTime.format(lesson.timeTable.time))
+        expanded.setTextViewText(R.id.type_lesson, if (lesson.lesson.lesson.isLection) "Лекция" else "Практика")
+        expanded.setTextViewText(R.id.name_lesson, lesson.lesson.lesson.lessonName)
+        expanded.setTextViewText(R.id.teachers, lesson.lesson.teachers.convertToString())
+        expanded.setTextViewText(R.id.lesson_cabinet, lesson.timeTable.cabinet)
+        return expanded
+    }
+
+    fun createCollapsedNotificationView(lesson: TimeTableWithLesson): RemoteViews{
+        val collapsed = RemoteViews(applicationContext.packageName, R.layout.notification_collapsed)
+        collapsed.setTextViewText(R.id.collapsed_notification_title, ConverterUtils.formatterTime.format(lesson.timeTable.time))
+        collapsed.setTextViewText(R.id.collapsed_notification_info, lesson.lesson.lesson.lessonName.convertLessonName())
+        return collapsed
     }
 
     suspend fun setNextNotification(group: Group, settings: Triple<Boolean, Boolean, Int>){
@@ -139,10 +153,27 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
             alarmManager.cancel(alarmPendingIntent)
         alarmManager.setAlarmClock(
             AlarmManager.AlarmClockInfo(
-                System.currentTimeMillis() + (60 * 1000),
+                nextLesson.timeTable.time.time,
                 alarmPendingIntent),
             alarmPendingIntent
         )
+    }
+
+    fun String.convertLessonName(): String{
+        if (length > 30)
+            replaceRange(31, length - 1, "...")
+        return this
+    }
+
+    fun List<Teacher>.convertToString(): String{
+        var str = ""
+        forEachIndexed { index, el ->
+            if (index != size - 1)
+                str += el.teacherName + ", "
+            else
+                str += el.teacherName
+        }
+        return str
     }
 
     companion object{

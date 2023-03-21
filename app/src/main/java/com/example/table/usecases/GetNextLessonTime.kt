@@ -1,6 +1,5 @@
 package com.example.table.usecases
 
-import android.os.Build
 import com.example.table.annotations.DayWeek
 import com.example.table.exceptions.TimeTableIsEmptyException
 import com.example.table.model.pojo.TimeTableWithLesson

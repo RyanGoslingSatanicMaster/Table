@@ -32,9 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.glance.appwidget.proto.LayoutProto
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.rememberLottieComposition
+import com.airbnb.lottie.compose.*
 import com.example.table.R
 import com.example.table.ui.theme.Primary
 import com.example.table.ui.theme.Secondary
@@ -306,7 +304,8 @@ fun wheatAnimation(visible: Boolean, modifier: Modifier){
                 + fadeOut(animationSpec = tween(durationMillis = 1000))
     ) {
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.wheat))
-        LottieAnimation(composition, alignment = Alignment.BottomStart, modifier = modifier
+        val progress by animateLottieCompositionAsState(composition = composition, iterations = LottieConstants.IterateForever)
+        LottieAnimation(composition, alignment = Alignment.BottomStart, progress = progress, modifier = modifier
             .fillMaxSize()
             .clip(RectangleShape))
     }
@@ -321,7 +320,8 @@ fun cloudsAnimation(visible: Boolean){
                 + fadeOut(animationSpec = tween(durationMillis = 1000))
     ) {
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.clouds))
-        LottieAnimation(composition, alignment = Alignment.TopEnd, modifier = Modifier
+        val progress by animateLottieCompositionAsState(composition = composition, iterations = LottieConstants.IterateForever)
+        LottieAnimation(composition, alignment = Alignment.TopEnd, progress = progress, modifier = Modifier
             .fillMaxWidth()
             .clip(
                 RectangleShape

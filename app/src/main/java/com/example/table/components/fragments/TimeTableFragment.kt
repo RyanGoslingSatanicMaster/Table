@@ -48,7 +48,10 @@ import com.example.table.ui.theme.*
 import com.example.table.utils.ConverterUtils
 import javax.inject.Inject
 
-class TimeTableFragment @Inject constructor(@DayNightMode private val isNightMode: Boolean, private val factory: DaggerViewModelFactory) : Fragment() {
+class TimeTableFragment @Inject constructor(
+    @DayNightMode private val isNightMode: Boolean,
+    private val factory: DaggerViewModelFactory,
+) : Fragment() {
 
 
     private lateinit var viewModel: TimeTableViewModel
@@ -57,7 +60,7 @@ class TimeTableFragment @Inject constructor(@DayNightMode private val isNightMod
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View? {
         viewModel = ViewModelProvider(this, factory).get(TimeTableViewModel::class.java)
         activityViewModel = (activity as MainActivity).viewModel
@@ -83,14 +86,14 @@ class TimeTableFragment @Inject constructor(@DayNightMode private val isNightMod
     }
 
     @Composable
-    fun TimeTableLayout(){
+    fun TimeTableLayout() {
         val list = viewModel.timeTable.observeAsState()
         if (list.value != null) {
 
             Box(modifier = Modifier.fillMaxSize()) {
                 TimeTableNavigationBar({
                     (activity as MainActivity).startGroupSelectionFragment()
-                },{
+                }, {
                     (activity as MainActivity).startSettingsFragment()
                 },
                     modifier = Modifier.align(Alignment.BottomEnd), isNightMode)
@@ -104,12 +107,13 @@ class TimeTableFragment @Inject constructor(@DayNightMode private val isNightMod
                         val startIndex by remember {
                             derivedStateOf {
                                 if (it) {
-                                    val index = list.value!!.first.days.indexOf(list.value!!.first.days.firstOrNull { it.day == "Сегодня" })
-                                    return@derivedStateOf if(index == -1) 0 else index
-                                }
-                                else {
-                                    val index = list.value!!.second.days.indexOf(list.value!!.second.days.firstOrNull { it.day == "Сегодня" })
-                                    return@derivedStateOf if(index == -1) 0 else index
+                                    val index =
+                                        list.value!!.first.days.indexOf(list.value!!.first.days.firstOrNull { it.day == "Сегодня" })
+                                    return@derivedStateOf if (index == -1) 0 else index
+                                } else {
+                                    val index =
+                                        list.value!!.second.days.indexOf(list.value!!.second.days.firstOrNull { it.day == "Сегодня" })
+                                    return@derivedStateOf if (index == -1) 0 else index
                                 }
                             }
                         }
@@ -132,17 +136,24 @@ class TimeTableFragment @Inject constructor(@DayNightMode private val isNightMod
 }
 
 @Composable
-fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -> Unit = {}, modifier: Modifier, isNightMode: Boolean){
+fun TimeTableNavigationBar(
+    onSearchClick: () -> Unit = {},
+    onSettingsClick: () -> Unit = {},
+    modifier: Modifier,
+    isNightMode: Boolean,
+) {
     Row(
         modifier = modifier
             .background(
                 shape = RoundedCornerShape(topStart = 30.dp),
-                brush = Brush.linearGradient(colors = if (!isNightMode) listOf(Color.White, Color.White) else listOf(
+                brush = Brush.linearGradient(colors = if (!isNightMode) listOf(Color.White,
+                    Color.White) else listOf(
                     Secondary, lightGreen))
             )
             .zIndex(1f)
     ) {
-        val colors = if (!isNightMode) listOf(Secondary, Primary) else listOf(extraLightBlue, extraDarkBlue)
+        val colors =
+            if (!isNightMode) listOf(Secondary, Primary) else listOf(extraLightBlue, extraDarkBlue)
         Icon(
             modifier = modifier
                 .defaultMinSize(minHeight = 50.dp, minWidth = 50.dp)
@@ -186,29 +197,39 @@ fun TimeTableNavigationBar(onSearchClick: () -> Unit = {}, onSettingsClick: () -
 }
 
 @Composable
-fun ShowTimeTable(fullTimeTable: WeekTimeTable, positionState: PositionState, isFirstWeek: Boolean, startIndex: Int, isNightMode: Boolean){
-    if (fullTimeTable == null || fullTimeTable.days.isEmpty()){
+fun ShowTimeTable(
+    fullTimeTable: WeekTimeTable,
+    positionState: PositionState,
+    isFirstWeek: Boolean,
+    startIndex: Int,
+    isNightMode: Boolean,
+) {
+    if (fullTimeTable == null || fullTimeTable.days.isEmpty()) {
         AnimatedVisibility(
             visible = true,
-            enter = slideInVertically(animationSpec = tween(1200)) + fadeIn(animationSpec = tween(1200)),
-            exit = slideOutHorizontally(animationSpec = tween(1200)) + fadeOut(animationSpec = tween(1200))
+            enter = slideInVertically(animationSpec = tween(1200)) + fadeIn(animationSpec = tween(
+                1200)),
+            exit = slideOutHorizontally(animationSpec = tween(1200)) + fadeOut(animationSpec = tween(
+                1200))
         ) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(text = "На этой неделе пар нету!", style = Typography.h1, color = Color.White)
             }
         }
         return
     }
-    val currentIndex = remember(isFirstWeek) { mutableStateOf(
-        startIndex
-    ) }
+    val currentIndex = remember(isFirstWeek) {
+        mutableStateOf(
+            startIndex
+        )
+    }
     val upgraded = remember {
         mutableStateOf(false)
     }
     val element = remember {
         mutableStateOf(fullTimeTable.days.get(currentIndex.value))
     }
-    when{
+    when {
         positionState == PositionState.Previous && !upgraded.value -> {
             currentIndex.value =
                 if (currentIndex.value == 0)
@@ -235,19 +256,28 @@ fun ShowTimeTable(fullTimeTable: WeekTimeTable, positionState: PositionState, is
     AnimatedVisibility(
         visible = !upgraded.value,
         enter = slideInVertically(animationSpec = tween(1200)) + fadeIn(animationSpec = tween(1200)),
-        exit = slideOutHorizontally(animationSpec = tween(1200)) + fadeOut(animationSpec = tween(1200))
+        exit = slideOutHorizontally(animationSpec = tween(1200)) + fadeOut(animationSpec = tween(
+            1200))
     ) {
         ShowCurrentDay(element = element.value, day = element.value.day, isFirstWeek, isNightMode)
     }
 }
 
 @Composable
-fun ShowCurrentDay(element: DayTimeTable, day: String, isFirstWeek: Boolean, isNightMode: Boolean){
+fun ShowCurrentDay(element: DayTimeTable, day: String, isFirstWeek: Boolean, isNightMode: Boolean) {
     Column(modifier = Modifier
         .fillMaxSize(), horizontalAlignment = Alignment.Start) {
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(text = day, style = Typography.h1, color = Color.White, modifier = Modifier.padding(10.dp))
-            Text(text = if (isFirstWeek) "1-ая неделя" else "2-я неделя", style = Typography.h3, color = Color.White, modifier = Modifier.padding(10.dp))
+        Row(horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically) {
+            Text(text = day,
+                style = Typography.h1,
+                color = Color.White,
+                modifier = Modifier.padding(10.dp))
+            Text(text = if (isFirstWeek) "1-ая неделя" else "2-я неделя",
+                style = Typography.h3,
+                color = Color.White,
+                modifier = Modifier.padding(10.dp))
         }
         Spacer(modifier = Modifier.height(20.dp))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -260,7 +290,7 @@ fun ShowCurrentDay(element: DayTimeTable, day: String, isFirstWeek: Boolean, isN
 }
 
 @Composable
-fun ShowTimeTableItem(timeTableWithLesson: TimeTableWithLesson, isNightMode: Boolean){
+fun ShowTimeTableItem(timeTableWithLesson: TimeTableWithLesson, isNightMode: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -272,33 +302,42 @@ fun ShowTimeTableItem(timeTableWithLesson: TimeTableWithLesson, isNightMode: Boo
                 alpha = 0.6f
             )
             .background(
-                brush = Brush.linearGradient(if (!isNightMode) listOf(Secondary, darkGreen) else listOf(
+                brush = Brush.linearGradient(if (!isNightMode) listOf(Secondary,
+                    darkGreen) else listOf(
                     Secondary, lightGreen)),
                 shape = Shapes.large
             )
             .padding(5.dp),
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Column(Modifier.weight(1f)) {
+        Column(Modifier.weight(2f)) {
             Text(
                 text = ConverterUtils.formatterTime.format(timeTableWithLesson.timeTable.time),
                 style = Typography.h3, color = Color.White,
-                )
+            )
             Text(
                 text = if (timeTableWithLesson.lesson.lesson.isLection) "Лекция" else "Практика",
                 style = Typography.body1, color = Color.White,
-                )
+            )
         }
         Column(verticalArrangement = Arrangement.Top, modifier = Modifier.weight(4f)) {
-            Text(text = timeTableWithLesson.lesson.lesson.lessonName, style = Typography.h3, color = Color.White)
+            Text(text = timeTableWithLesson.lesson.lesson.lessonName,
+                style = Typography.h3,
+                color = Color.White)
 
             timeTableWithLesson.lesson.teachers.forEach {
                 Text(text = it.teacherName, style = Typography.body1, color = Color.White)
             }
 
         }
-        Text(text = timeTableWithLesson.timeTable.cabinet?:"", style = Typography.body1, color = Color.White, modifier = Modifier.weight(1f))
+        Column(verticalArrangement = Arrangement.Center,
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = timeTableWithLesson.timeTable.cabinet ?: "",
+                style = Typography.body1,
+                color = Color.White)
+        }
 
     }
 }

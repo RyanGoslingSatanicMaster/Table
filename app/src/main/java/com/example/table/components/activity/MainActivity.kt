@@ -1,5 +1,6 @@
 package com.example.table.components.activity
 
+import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
@@ -14,11 +15,21 @@ import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.view.WindowInsets
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.core.app.ActivityCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.example.table.components.TableApp
@@ -34,13 +45,20 @@ import com.example.table.model.requests.NextLessonRequest
 import com.example.table.ui.ComposeFragmentContainer
 import com.example.table.ui.FragmentController
 import com.example.table.ui.theme.TableTheme
+import com.example.table.ui.theme.isGestureNavigationMode
 import com.example.table.utils.PrefUtils
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
 
 
 class MainActivity : AppCompatActivity() {
+
+    //TODO Get link on lesson
+    //TODO pending intent notification
+    //TODO Settings: Time before notificate, Saved Groups,
+    //TODO Bug: correct navigation, correct display next screen
 
     @Inject
     lateinit var factory: DaggerViewModelFactory
@@ -70,9 +88,12 @@ class MainActivity : AppCompatActivity() {
         const val ALARM_ACTION = "ALARM_ACTION_TIMETABLE_APP"
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        //window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        if (isGestureNavigationMode(this.contentResolver))
+            WindowCompat.setDecorFitsSystemWindows(window, false)
         alarmPendingIntent = Intent(this, AlarmReceiver::class.java).let {
             it.action = ALARM_ACTION
             PendingIntent.getBroadcast(this, 0, it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
@@ -118,6 +139,7 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             TableTheme {
+                transparentStatusBar()
                 ComposeFragmentContainer(viewId = fragmentContainerId, fragmentManager = this.supportFragmentManager
                 ) {
                     when{
@@ -138,6 +160,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    @Composable
+    fun transparentStatusBar(){
+        val systemUiController = rememberSystemUiController()
+        SideEffect {
+            systemUiController.setStatusBarColor(
+                color = Transparent,
+                darkIcons = false
+            )
+        }
     }
 
     fun requestPermission(perm: String, callback: () -> Unit){
@@ -177,25 +210,11 @@ class MainActivity : AppCompatActivity() {
         val next = alarmManager.nextAlarmClock
         if (next != null)
             alarmManager.cancel(alarmPendingIntent)
-        val calLesson = GregorianCalendar.getInstance()
-        val next2 = alarmManager.nextAlarmClock
-        //calLesson.time = nextLessonTime.timeTable.time
-        calLesson.set(2022, Calendar.DECEMBER, 2)
-        calLesson.set(Calendar.HOUR_OF_DAY, 18)
-        calLesson.set(Calendar.MINUTE, 48)
-        val calendar = Calendar.getInstance()
-        calendar.apply {
-            if (get(Calendar.DAY_OF_WEEK) != calLesson.get(Calendar.DAY_OF_WEEK)) {
-                add(Calendar.DAY_OF_MONTH, (calLesson.get(Calendar.DAY_OF_WEEK) + 7 - get(Calendar.DAY_OF_WEEK)) % 7);
-            }
-            set(Calendar.HOUR_OF_DAY, calLesson.get(Calendar.HOUR_OF_DAY))
-            set(Calendar.MINUTE, calLesson.get(Calendar.MINUTE))
-        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             if (alarmManager.canScheduleExactAlarms())
                 alarmManager.setAlarmClock(
                     AlarmManager.AlarmClockInfo(
-                        System.currentTimeMillis() + (60 * 1000),
+                        nextLessonTime.timeTable.time.time,
                         alarmPendingIntent),
                     alarmPendingIntent
                 )
@@ -204,7 +223,7 @@ class MainActivity : AppCompatActivity() {
         else
             alarmManager.setAlarmClock(
                 AlarmManager.AlarmClockInfo(
-                    System.currentTimeMillis() + (60 * 1000),
+                    nextLessonTime.timeTable.time.time,
                     alarmPendingIntent),
                 alarmPendingIntent
             )
