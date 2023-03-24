@@ -4,6 +4,10 @@
     <string name="notif_pract">Включить уведомление  о практиках</string>
     <string name="notife_lect">Включить уведомление  о лекциях</string>
     <string name="choose_group_number">Введите номер группы</string>
+    <string name="time_before_notify">Отправлять уведомление за</string>
+    <string name="save">Сохранить</string>
+    <string name="choose_hours">Часов</string>
+    <string name="choose_minutes">Минут</string>
     <string name="do_active">Сделать эту группу активной?</string>
     <string name="update_timetable">Расписание этой группы уже сохранено, хотите обновить?</string>
 </resources>

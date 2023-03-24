@@ -68,14 +68,22 @@ fun timeTableDay(el: Element, group: Group, isFirstWeek: Boolean): List<TimeTabl
 
     lessonList.forEach {
         val date = ConverterUtils.parseDateWithPrefix(day + ", " + it.getElementsByClass("time").text().substringBefore('<'))
+        var link : String? = null
+        var link2: String? = null
+        if (it.getElementsByClass("webex").isNotEmpty())
+            link = it.getElementsByClass("webex").first()?.attr("href")
+        if (it.getElementsByClass("webex").size > 1)
+            link2 = it.getElementsByClass("webex").component2()?.attr("href")
         val lesson = getLesson(it.getElementsByClass("diss").first()!!,
             it.getElementsByClass("yes").first(), group)
         val cabinet = it.getElementsByClass("who-where").first()?.text()
         timeTableList.add(TimeTableWithLesson(lesson = lesson,
             timeTable = TimeTable(cabinet = cabinet,
-                time = date!!,
+                time = date,
                 isFirstWeek = isFirstWeek,
-                lessonId = null
+                lessonId = null,
+                firstLink = link,
+                secondLink = link2
             )
         ))
     }

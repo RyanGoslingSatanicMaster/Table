@@ -65,6 +65,19 @@ class ConverterUtils {
             }
         }
 
+        fun convertToTime(time: String): String{
+            if (time.length > 1 && time.startsWith("0"))
+                return time.replaceFirst("0", "")
+            return time
+        }
+
+        fun validateInputTimeMinute(minute: String): Boolean{
+            return (minute.length <= 2) && minute.isNotEmpty() && minute.toInt() < 60 || minute.isEmpty()
+        }
+        fun validateInputTimeHours(minute: String): Boolean{
+            return (minute.length <= 2) && minute.isNotEmpty() && minute.toInt() < 24 || minute.isEmpty()
+        }
+
     }
 
     @TypeConverter

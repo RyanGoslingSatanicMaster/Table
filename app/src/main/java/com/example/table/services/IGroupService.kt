@@ -11,4 +11,5 @@ interface IGroupService {
     suspend fun deleteGroupData(group: Group)
     suspend fun getActiveGroup(): Group?
     suspend fun updateGroup(group: Group): Group
+    suspend fun getSavedGroups(): List<Group>
 }

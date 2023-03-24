@@ -62,3 +62,17 @@ fun TableTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable 
 fun isGestureNavigationMode(content: ContentResolver?): Boolean {
     return Settings.Secure.getInt(content, "navigation_mode", 0) === 2
 }
+
+fun String.convertToTime(): Int{
+    if (length > 1 && startsWith("0"))
+        return replaceFirst("0", "").toInt()
+    return this.toInt()
+}
+
+fun String.validateInputTimeMinute(): Boolean{
+    return "^([0-5]?[0-9])".toRegex().matches(this)
+}
+fun String.validateInputTimeHours(): Boolean{
+    return "^([0-1]?[0-9]|2[0-3])".toRegex().matches(this)
+
+}

@@ -28,6 +28,10 @@ data class TimeTable(
     val lessonId: Long? = null,
     @ColumnInfo(name = "is_first_week")
     val isFirstWeek: Boolean,
+    @ColumnInfo(name = "first_link")
+    val firstLink: String? = null,
+    @ColumnInfo(name = "second_link")
+    val secondLink: String? = null,
 ){
     override fun equals(other: Any?): Boolean {
         return if (other is TimeTable)

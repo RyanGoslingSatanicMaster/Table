@@ -28,4 +28,8 @@ class GroupRepository @Inject constructor(private val service: IGroupService): I
     override suspend fun updateGroup(group: Group): Group {
         return service.updateGroup(group)
     }
+
+    override suspend fun getSavedGroups(): List<Group> {
+        return service.getSavedGroups()
+    }
 }

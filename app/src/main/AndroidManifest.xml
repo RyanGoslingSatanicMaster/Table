@@ -25,7 +25,7 @@
         android:roundIcon="@drawable/table_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.Table"
-        tools:targetApi="31">
+        tools:targetApi="33">
 
         <activity
             android:name=".components.activity.SplashScreenActivity"
@@ -43,11 +43,6 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Table" />
-
-        <service android:name=".components.services.AlarmService"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"/>
 
         <receiver
             android:name=".components.broadcasts.TimeTableWidgetReceiver"

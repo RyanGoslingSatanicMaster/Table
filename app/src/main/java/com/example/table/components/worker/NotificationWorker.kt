@@ -145,18 +145,33 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
             it.action = MainActivity.ALARM_ACTION
             PendingIntent.getBroadcast(applicationContext, 0, it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
-        val cal = Calendar.getInstance()
-        cal.add(Calendar.MINUTE, settings.third)
+        val cal = Calendar.getInstance().apply {
+            add(Calendar.MINUTE, settings.third)
+        }
         val nextLesson = getNextLessonTime.getNextLessonTime(NextLessonRequest(settings, group, cal.time))
+        val calNextLesson = Calendar.getInstance().apply {
+            time = nextLesson.timeTable.time
+            add(Calendar.MINUTE, settings.third * -1)
+        }
         val next = alarmManager.nextAlarmClock
         if (next != null)
             alarmManager.cancel(alarmPendingIntent)
-        alarmManager.setAlarmClock(
-            AlarmManager.AlarmClockInfo(
-                nextLesson.timeTable.time.time,
-                alarmPendingIntent),
-            alarmPendingIntent
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            if (alarmManager.canScheduleExactAlarms())
+                alarmManager.setAlarmClock(
+                    AlarmManager.AlarmClockInfo(
+                        calNextLesson.timeInMillis,
+                        alarmPendingIntent),
+                    alarmPendingIntent
+                )
+
+        else
+            alarmManager.setAlarmClock(
+                AlarmManager.AlarmClockInfo(
+                    calNextLesson.timeInMillis,
+                    alarmPendingIntent),
+                alarmPendingIntent
+            )
     }
 
     fun String.convertLessonName(): String{

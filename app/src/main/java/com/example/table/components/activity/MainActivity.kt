@@ -1,5 +1,6 @@
 package com.example.table.components.activity
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -57,7 +58,6 @@ class MainActivity : AppCompatActivity() {
 
     //TODO Get link on lesson
     //TODO pending intent notification
-    //TODO Settings: Time before notificate, Saved Groups,
     //TODO Bug: correct navigation, correct display next screen
 
     @Inject
@@ -91,7 +91,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
         if (isGestureNavigationMode(this.contentResolver))
             WindowCompat.setDecorFitsSystemWindows(window, false)
         alarmPendingIntent = Intent(this, AlarmReceiver::class.java).let {
@@ -112,26 +111,7 @@ class MainActivity : AppCompatActivity() {
 
         getNotifications()
 
-        viewModel.notificationSettings.observe(this){ triple ->
-            if (triple != null)
-                viewModel.activeGroup.value?.let {
-                    if (it.isActive && it.dateOfFirstWeek != null)
-                        viewModel.getNextLessonTime(NextLessonRequest(triple, it))
-                }
-        }
-
-        viewModel.nextLessonTime.observe(this){
-            setNewAlarm(it)
-        }
-
-        viewModel.activeGroup.observe(this){ group ->
-            Log.v("ACTIVE_GROUP", group.toString())
-            if (group != null)
-                viewModel.notificationSettings.value?.let {
-                    if (group.isActive && group.dateOfFirstWeek != null)
-                        viewModel.getNextLessonTime(NextLessonRequest(it, group))
-                }
-        }
+        initSubscribes()
 
         onBackPressedDispatcher.addCallback(this){
             lastBackStackFragment()
@@ -145,14 +125,14 @@ class MainActivity : AppCompatActivity() {
                     when{
                         activeGroup && viewModel.activeGroup.value == null -> {
                             viewModel.getActiveGroup()
-                            add(it, fragmentMap.get(TimeTableFragment::class.java)!!.get())
+                            add(it, fragmentMap[TimeTableFragment::class.java]!!.get())
                         }
                         // TODO controversial decision, may be replace with another features
                         viewModel.activeGroup.value != null -> {
-                            add(it, fragmentMap.get(TimeTableFragment::class.java)!!.get())
+                            add(it, fragmentMap[TimeTableFragment::class.java]!!.get())
                         }
                         else -> {
-                            add(it, fragmentMap.get(GroupSelectionFragment::class.java)!!.get())
+                            add(it, fragmentMap[GroupSelectionFragment::class.java]!!.get())
                         }
                     }
                 }
@@ -160,6 +140,31 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    fun initSubscribes() {
+        viewModel.notificationSettings.observe(this){ triple ->
+            if (triple != null) {
+                if (triple.first || triple.second)
+                    viewModel.activeGroup.value?.let {
+                        if (it.isActive && it.dateOfFirstWeek != null)
+                            viewModel.getNextLessonTime(NextLessonRequest(triple, it), ::setNewAlarm)
+                    }
+                else
+                    cancelNextAlarm()
+            }
+        }
+
+        viewModel.activeGroup.observe(this){ group ->
+            if (group != null)
+                viewModel.notificationSettings.value?.let {
+                    if (it.first || it.second) {
+                        if (group.isActive && group.dateOfFirstWeek != null)
+                            viewModel.getNextLessonTime(NextLessonRequest(it, group), ::setNewAlarm)
+                    } else
+                        cancelNextAlarm()
+                }
+        }
     }
 
     @Composable
@@ -173,7 +178,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun requestPermission(perm: String, callback: () -> Unit){
+    fun requestPermission(callback: () -> Unit){
         /*val intent = Intent()
         val powerManager = getSystemService(POWER_SERVICE) as PowerManager
         if (powerManager.isIgnoringBatteryOptimizations(packageName))
@@ -186,7 +191,7 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= 31) {
             val permission = ActivityCompat.checkSelfPermission(
                 this,
-                perm
+                Manifest.permission.SCHEDULE_EXACT_ALARM
             )
             if (permission == PackageManager.PERMISSION_GRANTED)
                 callback.invoke()
@@ -202,19 +207,39 @@ class MainActivity : AppCompatActivity() {
             this,
             "Разрешение на использование будильника отключено",
             Toast.LENGTH_LONG
-        )
+        ).show()
         viewModel.notificationSettings.value = Triple(false, false, 5)
+
     }
 
-    private fun setNewAlarm(nextLessonTime: TimeTableWithLesson){
+    fun navigateWebView(url: String){
+        val httpIntent = Intent(Intent.ACTION_VIEW)
+        httpIntent.data = Uri.parse(url)
+        startActivity(httpIntent)
+    }
+
+    private fun cancelNextAlarm(){
         val next = alarmManager.nextAlarmClock
         if (next != null)
             alarmManager.cancel(alarmPendingIntent)
+    }
+
+    private fun setNewAlarm(nextLessonTime: TimeTableWithLesson, settings: Triple<Boolean, Boolean, Int>){
+        val next = alarmManager.nextAlarmClock
+        val cal = Calendar.getInstance().apply {
+            time = nextLessonTime.timeTable.time
+            add(Calendar.MINUTE, settings.third * -1)
+        }
+        if (next != null)
+            alarmManager.cancel(alarmPendingIntent)
+        if (!settings.first && !settings.second )
+            return
+        Log.v("AlarmTime", cal.time.toString())
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             if (alarmManager.canScheduleExactAlarms())
                 alarmManager.setAlarmClock(
                     AlarmManager.AlarmClockInfo(
-                        nextLessonTime.timeTable.time.time,
+                        cal.timeInMillis,
                         alarmPendingIntent),
                     alarmPendingIntent
                 )
@@ -223,10 +248,11 @@ class MainActivity : AppCompatActivity() {
         else
             alarmManager.setAlarmClock(
                 AlarmManager.AlarmClockInfo(
-                    nextLessonTime.timeTable.time.time,
+                    cal.timeInMillis,
                     alarmPendingIntent),
                 alarmPendingIntent
             )
+
     }
 
     private fun getNotifications(){
@@ -236,7 +262,6 @@ class MainActivity : AppCompatActivity() {
     fun setNotifications(pair: Triple<Boolean, Boolean, Int>){
         viewModel.notificationSettings.value = pair
         prefUtils.setNotifications(pair)
-        viewModel.getNextLessonTime(NextLessonRequest(pair, viewModel.activeGroup.value!!))
     }
 
     fun startTimeTableFragment(){
@@ -256,7 +281,7 @@ class MainActivity : AppCompatActivity() {
         if (stackSize != 0)
             supportFragmentManager.popBackStack()
         else
-            finish()
+            finishAffinity()
     }
 
 }

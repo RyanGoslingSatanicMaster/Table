@@ -22,6 +22,7 @@ class PrefUtils @Inject constructor(
         with(sharedPreferences.edit()){
             putBoolean(LECTION_NOTIFY_KEY, pair.first)
             putBoolean(PRACTICE_NOTIFY_KEY, pair.second)
+            putInt(TIME_BEFORE_NOTIFY_KEY, pair.third)
             apply()
         }
     }

@@ -30,4 +30,8 @@ class GroupService @Inject constructor(): ApiService(), IGroupService {
     override suspend fun updateGroup(group: Group): Group {
         return dao.updateActiveGroup(group)
     }
+
+    override suspend fun getSavedGroups(): List<Group> {
+        return dao.getAllGroup()
+    }
 }

@@ -10,10 +10,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,25 +24,30 @@ import androidx.compose.ui.graphics.vector.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.zIndex
 import androidx.glance.appwidget.proto.LayoutProto
 import com.airbnb.lottie.compose.*
 import com.example.table.R
-import com.example.table.ui.theme.Primary
-import com.example.table.ui.theme.Secondary
+import com.example.table.ui.theme.*
 import com.example.table.utils.Constant
+import com.example.table.utils.ConverterUtils
 
 @Stable
-enum class PositionState{
+enum class PositionState {
     Previous, Next, Current
 }
 
 @Composable
-fun progressBar(visible: Boolean){
+fun progressBar(visible: Boolean) {
     AnimatedVisibility(visible = visible,
         enter = slideInHorizontally(animationSpec = tween(durationMillis = 1600))
                 + fadeIn(animationSpec = tween(durationMillis = 1600)),
@@ -65,22 +68,30 @@ fun progressBar(visible: Boolean){
 }
 
 @Composable
-fun showDialog(text: String, onConfirm: () -> Unit = {}, onDismiss: () -> Unit = {}, confirmText: String = Constant.YES, dismissText: String = Constant.NO){
+fun showDialog(
+    text: String,
+    onConfirm: () -> Unit = {},
+    onDismiss: () -> Unit = {},
+    confirmText: String = Constant.YES,
+    dismissText: String = Constant.NO,
+) {
     val openDialog = remember { mutableStateOf(true) }
     if (openDialog.value)
         AlertDialog(onDismissRequest = {
             onDismiss()
-            openDialog.value = false },
+            openDialog.value = false
+        },
             confirmButton = @Composable {
                 alertButton(text = confirmText) {
                     onConfirm()
                     openDialog.value = false
                 }
             },
-            dismissButton = @Composable {alertButton(text = dismissText) {
-                openDialog.value = false
-                onDismiss()
-            }
+            dismissButton = @Composable {
+                alertButton(text = dismissText) {
+                    openDialog.value = false
+                    onDismiss()
+                }
             },
             text = @Composable { Text(text = text, color = Color.White) },
             modifier = Modifier
@@ -94,7 +105,110 @@ fun showDialog(text: String, onConfirm: () -> Unit = {}, onDismiss: () -> Unit =
 }
 
 @Composable
-fun alertButton(text: String, onClick: () -> Unit){
+fun CustomAlertDialog(startValue: Int, onSave: (Int) -> Unit, onExit: () -> Unit) {
+
+    val hour = remember { mutableStateOf((startValue/60).toString()) }
+    val minutes = remember { mutableStateOf((startValue - (startValue/60) * 60).toString()) }
+    Dialog(onDismissRequest = { onExit() }, properties = DialogProperties(
+        dismissOnBackPress = true, dismissOnClickOutside = true
+    )) {
+        Card(
+            //shape = MaterialTheme.shapes.medium,
+            shape = RoundedCornerShape(10.dp),
+            // modifier = modifier.size(280.dp, 240.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            elevation = 8.dp
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+            ) {
+
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                        .background(Primary)
+                        .padding(8.dp, 0.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+
+                    ) {
+
+                    OutlinedTextField(
+                        value = hour.value,
+                        onValueChange = {
+                            if (it.validateInputTimeHours()) hour.value = it
+                        },
+                        textStyle = TextStyle(fontSize = 25.sp, color = Color.White),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier
+                            .weight(3f)
+                            .fillMaxWidth(),
+                        placeholder = {
+                            Text(text = stringResource(R.string.choose_hours),
+                                style = TextStyle(color = Hint))
+                        },
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = Color.White,
+                            unfocusedBorderColor = Color.White
+                        )
+                    )
+                    Text(
+                        text = ":",
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .weight(2f)
+                            .fillMaxWidth(),
+                        color = Color.White,
+                        fontSize = 25.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    OutlinedTextField(
+                        value = minutes.value,
+                        onValueChange = {
+                            if (it.validateInputTimeMinute()) minutes.value = it
+                        },
+                        textStyle = TextStyle(fontSize = 25.sp, color = Color.White),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier
+                            .weight(3f)
+                            .fillMaxWidth(),
+                        placeholder = {
+                            Text(text = stringResource(R.string.choose_minutes),
+                                style = TextStyle(color = Hint))
+                        },
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            focusedBorderColor = Color.White,
+                            unfocusedBorderColor = Color.White
+                        )
+                    )
+                }
+
+                Row(Modifier.padding(top = 10.dp)) {
+                    OutlinedButton(
+                        onClick = { onSave(hour.value.convertToTime() * 60 + minutes.value.convertToTime()) },
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Text(text = "Сохранить")
+                    }
+                }
+
+            }
+        }
+    }
+}
+
+@Composable
+fun alertButton(text: String, onClick: () -> Unit) {
     Box(modifier = Modifier
         .clickable { onClick() }
         .padding(10.dp),
@@ -114,11 +228,11 @@ fun AnimatedBackgroundGradient(
     padding: Dp = 0.dp,
     isNightMode: Boolean = false,
     innerElement: @Composable (PositionState, Boolean) -> Unit = { a, b ->
-    }
-){
+    },
+) {
 
-    val xOffset = remember{ mutableStateOf(0f) }
-    val yOffset = remember{ mutableStateOf(0f) }
+    val xOffset = remember { mutableStateOf(0f) }
+    val yOffset = remember { mutableStateOf(0f) }
 
     val positionTop = remember { mutableStateOf(topPosition) }
 
@@ -159,10 +273,10 @@ fun AnimatedBackgroundGradient(
     ) {
 
         // init size
-        val itemWidthPx = with(LocalDensity.current){
-            (maxWidth - (padding*2)).toPx()
+        val itemWidthPx = with(LocalDensity.current) {
+            (maxWidth - (padding * 2)).toPx()
         }
-        val itemHeightPx = with(LocalDensity.current){
+        val itemHeightPx = with(LocalDensity.current) {
             (maxHeight - padding).toPx()
         }
         val gradientWidth = 0.2f * itemHeightPx
@@ -193,21 +307,24 @@ fun SlideAnimatedContent(
     gradientWidth: Float,
     padding: Dp,
     isNightMode: Boolean,
-    innerElement: @Composable (PositionState, Boolean) -> Unit){
+    innerElement: @Composable (PositionState, Boolean) -> Unit,
+) {
 
     // COLOR ANIMATION
     val colorState = remember {
         mutableStateOf(if (positionTop.value) colors.first else colors.second)
     }
 
-    val color by animateColorAsState(targetValue = colorState.value, animationSpec = tween(duration))
+    val color by animateColorAsState(targetValue = colorState.value,
+        animationSpec = tween(duration))
 
     if (positionTop.value)
         colorState.value = colors.first
     else
         colorState.value = colors.second
 
-    val colors = listOf(color.copy(alpha = 0.9f),color.copy(alpha = 0.6f), color.copy(alpha = 0.9f))
+    val colors =
+        listOf(color.copy(alpha = 0.9f), color.copy(alpha = 0.6f), color.copy(alpha = 0.9f))
 
     // NEXT ANIMATION
 
@@ -227,7 +344,7 @@ fun SlideAnimatedContent(
     if (xShimmer == (itemWidthPx + gradientWidth))
         positionState.value = PositionState.Current
 
-    when(positionState.value){
+    when (positionState.value) {
         PositionState.Previous -> {
             xState.value = (itemWidthPx + gradientWidth)
             yState.value = (itemHeightPx + gradientWidth)
@@ -267,8 +384,8 @@ fun shimmerRecipeItem(
     gradientWidth: Float,
     isNightMode: Boolean,
     padding: Dp,
-    innerElement: @Composable (PositionState, Boolean) -> Unit
-){
+    innerElement: @Composable (PositionState, Boolean) -> Unit,
+) {
     val brush = Brush.linearGradient(
         colors,
         start = Offset(xShimmer - gradientWidth, yShimmer - gradientWidth),
@@ -277,9 +394,9 @@ fun shimmerRecipeItem(
     Box(modifier = Modifier
         .fillMaxSize()
         .padding(padding)
-        .background(brush)){
-        val positionState by remember{ derivedStateOf { position.value } }
-        val isTop by remember{ derivedStateOf { positionTop.value } }
+        .background(brush)) {
+        val positionState by remember { derivedStateOf { position.value } }
+        val isTop by remember { derivedStateOf { positionTop.value } }
         if (isNightMode)
             starAnimation(visible = isTop)
         else
@@ -291,28 +408,32 @@ fun shimmerRecipeItem(
 }
 
 @Composable
-fun wheatAnimation(visible: Boolean, modifier: Modifier){
+fun wheatAnimation(visible: Boolean, modifier: Modifier) {
     AnimatedVisibility(visible = visible,
         enter = slideInVertically(initialOffsetY = {
             it / 2
         },
             animationSpec = tween(durationMillis = 1600))
                 + fadeIn(animationSpec = tween(durationMillis = 1600)),
-        exit = slideOutVertically( targetOffsetY = {
+        exit = slideOutVertically(targetOffsetY = {
             it / 2
         }, animationSpec = tween(durationMillis = 1000))
                 + fadeOut(animationSpec = tween(durationMillis = 1000))
     ) {
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.wheat))
-        val progress by animateLottieCompositionAsState(composition = composition, iterations = LottieConstants.IterateForever)
-        LottieAnimation(composition, alignment = Alignment.BottomStart, progress = progress, modifier = modifier
-            .fillMaxSize()
-            .clip(RectangleShape))
+        val progress by animateLottieCompositionAsState(composition = composition,
+            iterations = LottieConstants.IterateForever)
+        LottieAnimation(composition,
+            alignment = Alignment.BottomStart,
+            progress = progress,
+            modifier = modifier
+                .fillMaxSize()
+                .clip(RectangleShape))
     }
 }
 
 @Composable
-fun cloudsAnimation(visible: Boolean){
+fun cloudsAnimation(visible: Boolean) {
     AnimatedVisibility(visible = visible,
         enter = slideInVertically(animationSpec = tween(durationMillis = 1600))
                 + fadeIn(animationSpec = tween(durationMillis = 1600)),
@@ -320,17 +441,21 @@ fun cloudsAnimation(visible: Boolean){
                 + fadeOut(animationSpec = tween(durationMillis = 1000))
     ) {
         val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.clouds))
-        val progress by animateLottieCompositionAsState(composition = composition, iterations = LottieConstants.IterateForever)
-        LottieAnimation(composition, alignment = Alignment.TopEnd, progress = progress, modifier = Modifier
-            .fillMaxWidth()
-            .clip(
-                RectangleShape
-            ))
+        val progress by animateLottieCompositionAsState(composition = composition,
+            iterations = LottieConstants.IterateForever)
+        LottieAnimation(composition,
+            alignment = Alignment.TopEnd,
+            progress = progress,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(
+                    RectangleShape
+                ))
     }
 }
 
 @Composable
-fun starAnimation(visible: Boolean){
+fun starAnimation(visible: Boolean) {
     AnimatedVisibility(visible = visible,
         enter = slideInVertically(animationSpec = tween(durationMillis = 1600))
                 + fadeIn(animationSpec = tween(durationMillis = 1600)),
@@ -352,7 +477,7 @@ fun Modifier.drawColoredShadow(
     borderRadius: Dp = 0.dp,
     shadowRadius: Dp = 10.dp,
     offsetY: Dp = 0.dp,
-    offsetX: Dp = 0.dp
+    offsetX: Dp = 0.dp,
 ) = this.drawBehind {
     val transparentColor = color.copy(alpha = 0.0f).toArgb()
     val shadowColor = color.copy(alpha = alpha).toArgb()

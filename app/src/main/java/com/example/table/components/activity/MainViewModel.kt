@@ -16,32 +16,38 @@ import java.sql.Time
 import java.util.*
 import javax.inject.Inject
 
-class MainViewModel @Inject constructor(private val getActiveGroup: IGetActiveGroup,
-                                        private val getNextLessonTime: IGetNextLessonTime): ViewModel() {
+class MainViewModel @Inject constructor(
+    private val getActiveGroup: IGetActiveGroup,
+    private val getNextLessonTime: IGetNextLessonTime,
+) : ViewModel() {
 
     val activeGroup = MutableLiveData<Group>()
 
     val notificationSettings = MutableLiveData<Triple<Boolean, Boolean, Int>>()
 
-    val nextLessonTime = MutableLiveData<TimeTableWithLesson>()
-
-    fun setGroup(group: Group){
+    fun setGroup(group: Group) {
         activeGroup.value = group
     }
 
-    fun getActiveGroup(){
+    fun getActiveGroup() {
         viewModelScope.launch {
             activeGroup.postValue(getActiveGroup.getActiveGroup())
         }
     }
 
-    fun getNextLessonTime(request: NextLessonRequest){
+    fun getNextLessonTime(
+        request: NextLessonRequest,
+        callback: (lesson: TimeTableWithLesson, settings: Triple<Boolean, Boolean, Int>) -> Unit,
+    ) {
         viewModelScope.launch {
+            var lesson: TimeTableWithLesson? = null
             try {
-                nextLessonTime.postValue(getNextLessonTime.getNextLessonTime(request))
-            }
-            catch (ex: TimeTableIsEmptyException){
+                lesson = getNextLessonTime.getNextLessonTime(request)
+            } catch (ex: TimeTableIsEmptyException) {
 
+            }
+            lesson?.let {
+                callback(lesson, request.notify)
             }
         }
     }

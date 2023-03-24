@@ -124,7 +124,9 @@ class TimeTableFragment @Inject constructor(
                             isFirstWeek = it,
                             startIndex = startIndex,
                             isNightMode = isNightMode
-                        )
+                        ){
+                            (activity as MainActivity).navigateWebView(it)
+                        }
                     }
 
                 }
@@ -203,8 +205,9 @@ fun ShowTimeTable(
     isFirstWeek: Boolean,
     startIndex: Int,
     isNightMode: Boolean,
+    onLinkClicked: (String) -> Unit
 ) {
-    if (fullTimeTable == null || fullTimeTable.days.isEmpty()) {
+    if (fullTimeTable.days.isEmpty()) {
         AnimatedVisibility(
             visible = true,
             enter = slideInVertically(animationSpec = tween(1200)) + fadeIn(animationSpec = tween(
@@ -218,7 +221,7 @@ fun ShowTimeTable(
         }
         return
     }
-    val currentIndex = remember(isFirstWeek) {
+    val currentIndex = remember(startIndex, isFirstWeek) {
         mutableStateOf(
             startIndex
         )
@@ -259,12 +262,12 @@ fun ShowTimeTable(
         exit = slideOutHorizontally(animationSpec = tween(1200)) + fadeOut(animationSpec = tween(
             1200))
     ) {
-        ShowCurrentDay(element = element.value, day = element.value.day, isFirstWeek, isNightMode)
+        ShowCurrentDay(element = element.value, day = element.value.day, isFirstWeek, isNightMode){ onLinkClicked(it) }
     }
 }
 
 @Composable
-fun ShowCurrentDay(element: DayTimeTable, day: String, isFirstWeek: Boolean, isNightMode: Boolean) {
+fun ShowCurrentDay(element: DayTimeTable, day: String, isFirstWeek: Boolean, isNightMode: Boolean, onLinkClicked: (String) -> Unit) {
     Column(modifier = Modifier
         .fillMaxSize(), horizontalAlignment = Alignment.Start) {
         Row(horizontalArrangement = Arrangement.SpaceBetween,
@@ -282,7 +285,7 @@ fun ShowCurrentDay(element: DayTimeTable, day: String, isFirstWeek: Boolean, isN
         Spacer(modifier = Modifier.height(20.dp))
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             element.timeTableList.forEach {
-                ShowTimeTableItem(timeTableWithLesson = it, isNightMode)
+                ShowTimeTableItem(timeTableWithLesson = it, isNightMode) { onLinkClicked(it) }
                 Spacer(modifier = Modifier.height(10.dp))
             }
         }
@@ -290,7 +293,7 @@ fun ShowCurrentDay(element: DayTimeTable, day: String, isFirstWeek: Boolean, isN
 }
 
 @Composable
-fun ShowTimeTableItem(timeTableWithLesson: TimeTableWithLesson, isNightMode: Boolean) {
+fun ShowTimeTableItem(timeTableWithLesson: TimeTableWithLesson, isNightMode: Boolean, onLinkClicked: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -332,11 +335,21 @@ fun ShowTimeTableItem(timeTableWithLesson: TimeTableWithLesson, isNightMode: Boo
 
         }
         Column(verticalArrangement = Arrangement.Center,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(2f),
             horizontalAlignment = Alignment.CenterHorizontally) {
             Text(text = timeTableWithLesson.timeTable.cabinet ?: "",
                 style = Typography.body1,
                 color = Color.White)
+            timeTableWithLesson.timeTable.firstLink?.let{
+                Button(onClick = { onLinkClicked(it) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)) {
+                    Text(text = "ссылка", style = Typography.body1, color = Color.Black)
+                }
+            }
+            timeTableWithLesson.timeTable.secondLink?.let {
+                Button(onClick = { onLinkClicked(it) }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.White)) {
+                    Text(text = "ссылка", style = Typography.body1, color = Color.Black)
+                }
+            }
         }
 
     }
