@@ -40,7 +40,8 @@ class GetTimeTable @Inject constructor(private val repository: ITimeTableReposit
                 DayTimeTable(
                     when{
                         currentWeek && currentDate.day == remainder[0].timeTable.time.day -> "Сегодня"
-                        currentWeek && currentDate.day + 1 == remainder[0].timeTable.time.day -> "Завтра"
+                        currentWeek && currentDate.day != 0 && currentDate.day + 1 == remainder[0].timeTable.time.day -> "Завтра"
+                        !currentWeek && currentDate.day == 0 && remainder[0].timeTable.time.day == 1 -> "Завтра"
                         else -> dayWeek[remainder[0].timeTable.time.day].first
                     },
                     middleList.first

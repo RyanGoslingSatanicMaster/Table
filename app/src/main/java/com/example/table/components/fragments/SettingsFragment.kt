@@ -142,15 +142,18 @@ class SettingsFragment @Inject constructor() : Fragment() {
                         .fillMaxWidth()
                         .height(280.dp)
                         .verticalScroll(rememberScrollState())
-                        .weight(1f, false)) {
-                    viewModel.refreshGroupTimeTable(it, { group ->
-                        activityViewModel.setGroup(group)
-                        (activity as MainActivity).startTimeTableFragment()
-                    }) { ex ->
-                        Toast.makeText(requireContext(),
-                            "Не удалось загрузить расписание",
-                            Toast.LENGTH_LONG).show()
-                    }
+                        .weight(1f, false), {
+                        viewModel.refreshGroupTimeTable(it, { group ->
+                            activityViewModel.setGroup(group)
+                            (activity as MainActivity).startTimeTableFragment()
+                        }) { ex ->
+                            Toast.makeText(requireContext(),
+                                "Не удалось загрузить расписание",
+                                Toast.LENGTH_LONG).show()
+                        }
+                    }) { group ->
+                    activityViewModel.setGroup(group)
+                    (activity as MainActivity).startTimeTableFragment()
                 }
             }
         }
@@ -275,6 +278,7 @@ class SettingsFragment @Inject constructor() : Fragment() {
         groupList: List<Group>?,
         modifier: Modifier,
         onRefresh: (Group) -> Unit,
+        onShowGroup: (Group) -> Unit
     ) {
         Column(modifier = modifier,
             verticalArrangement = Arrangement.Top,
@@ -282,7 +286,9 @@ class SettingsFragment @Inject constructor() : Fragment() {
             groupList?.forEach {
                 Row(modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween) {
-                    Box(modifier = Modifier.width(110.dp)) {
+                    Box(modifier = Modifier.width(110.dp).clickable {
+                        onShowGroup(it)
+                    }) {
                         Text(text = it.groupName, style = Typography.h6, color = Color.Black)
                     }
                     Icon(imageVector = Icons.Default.Refresh,

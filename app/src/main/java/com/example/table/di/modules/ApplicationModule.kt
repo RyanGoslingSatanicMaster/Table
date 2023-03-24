@@ -22,18 +22,19 @@ import retrofit2.create
 import java.util.*
 
 @Module
-class ApplicationModule  {
+class ApplicationModule {
 
     private val app: TableApp
 
     private lateinit var api: Api
 
-    constructor(app: TableApp){
+    constructor(app: TableApp) {
         this.app = app
     }
 
     @Provides
-    fun provideSharedPref() = app.getSharedPreferences(Constant.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+    fun provideSharedPref() =
+        app.getSharedPreferences(Constant.SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
 
     @Provides
     fun providesGson() = GsonBuilder()
@@ -46,7 +47,8 @@ class ApplicationModule  {
 
     @Provides
     fun providesRetrofit(gson: Gson, client: OkHttpClient) = Retrofit.Builder().baseUrl(
-        Constant.BASE_URL).client(client).addConverterFactory(GsonConverterFactory.create(gson)).build()
+        Constant.BASE_URL).client(client).addConverterFactory(GsonConverterFactory.create(gson))
+        .build()
 
     @Provides
     fun providesApi(retrofit: Retrofit) = retrofit.create<Api>()
@@ -68,7 +70,7 @@ class ApplicationModule  {
 
     @Provides
     @DayNightMode
-    fun provideDayNightMode(date: Date): Boolean{
+    fun provideDayNightMode(date: Date): Boolean {
         val cal = Calendar.getInstance()
         cal.set(Calendar.AM_PM, Calendar.PM)
         cal.set(Calendar.HOUR_OF_DAY, 18)
@@ -78,12 +80,12 @@ class ApplicationModule  {
     }
 
     @Provides
-    fun providesContext(): Context{
+    fun providesContext(): Context {
         return app
     }
 
     @Provides
-    fun providesApplication(): Application{
+    fun providesApplication(): Application {
         return app
     }
 

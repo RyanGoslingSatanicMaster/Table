@@ -71,7 +71,7 @@ class TimeTableWidgetReceiver : GlanceAppWidgetReceiver() {
         }
     }
 
-    fun observeData(index: Int, context: Context){
+    private fun observeData(index: Int, context: Context){
         scope.launch {
             val day = getDayWidget.getActiveDayWidget(index)
             val glanceId =
