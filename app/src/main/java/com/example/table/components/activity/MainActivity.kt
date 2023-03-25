@@ -38,6 +38,7 @@ import com.example.table.components.broadcasts.AlarmReceiver
 import com.example.table.components.fragments.GroupSelectionFragment
 import com.example.table.components.fragments.SettingsFragment
 import com.example.table.components.fragments.TimeTableFragment
+import com.example.table.components.worker.NotificationWorker
 import com.example.table.di.DaggerViewModelFactory
 import com.example.table.di.components.MainActivityComponent
 import com.example.table.di.modules.ActivityModule
@@ -55,10 +56,6 @@ import javax.inject.Provider
 
 
 class MainActivity : AppCompatActivity() {
-
-    //TODO Get link on lesson
-    //TODO pending intent notification
-    //TODO Bug: correct navigation, correct display next screen
 
     @Inject
     lateinit var factory: DaggerViewModelFactory
@@ -78,7 +75,9 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var alarmPendingIntent: PendingIntent
 
-
+    private val isFromNotification by lazy {
+        intent.getBooleanExtra(NotificationWorker.ACTION_NOTIFICATION_INTENT, false)
+    }
 
     val fragmentContainerId: Int = View.generateViewId()
 
@@ -123,7 +122,7 @@ class MainActivity : AppCompatActivity() {
                 ComposeFragmentContainer(viewId = fragmentContainerId, fragmentManager = this.supportFragmentManager
                 ) {
                     when{
-                        activeGroup && viewModel.activeGroup.value == null -> {
+                        activeGroup && viewModel.activeGroup.value == null || isFromNotification -> {
                             viewModel.getActiveGroup()
                             add(it, fragmentMap[TimeTableFragment::class.java]!!.get())
                         }
@@ -131,6 +130,7 @@ class MainActivity : AppCompatActivity() {
                         viewModel.activeGroup.value != null -> {
                             add(it, fragmentMap[TimeTableFragment::class.java]!!.get())
                         }
+
                         else -> {
                             add(it, fragmentMap[GroupSelectionFragment::class.java]!!.get())
                         }
@@ -234,7 +234,6 @@ class MainActivity : AppCompatActivity() {
             alarmManager.cancel(alarmPendingIntent)
         if (!settings.first && !settings.second )
             return
-        Log.v("AlarmTime", cal.time.toString())
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             if (alarmManager.canScheduleExactAlarms())
                 alarmManager.setAlarmClock(

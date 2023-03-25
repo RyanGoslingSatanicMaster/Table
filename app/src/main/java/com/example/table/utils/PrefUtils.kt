@@ -27,6 +27,16 @@ class PrefUtils @Inject constructor(
         }
     }
 
+    fun isAppFirstStart(): Boolean{
+        val isAppFirstStart = sharedPreferences.getBoolean(APP_FIRST_START_KEY, true)
+        if (isAppFirstStart)
+            with(sharedPreferences.edit()){
+                putBoolean(APP_FIRST_START_KEY, false)
+                apply()
+            }
+        return isAppFirstStart
+    }
+
     fun getTestKeyTime(): Int{
         return sharedPreferences.getInt(TEST_KEY_TIME, 0)
     }
@@ -43,5 +53,6 @@ class PrefUtils @Inject constructor(
         const val PRACTICE_NOTIFY_KEY = "PRACTICE_NOTIFY_KEY"
         const val TIME_BEFORE_NOTIFY_KEY = "TIME_BEFORE_NOTIFY_KEY"
         const val TEST_KEY_TIME = "TEST_KEY_TIME"
+        const val APP_FIRST_START_KEY = "APP_FIRST_START_KEY"
     }
 }

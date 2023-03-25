@@ -12,6 +12,7 @@ import com.example.table.model.requests.TimeTableRequest
 import com.example.table.usecases.*
 import com.example.table.utils.Constant
 import kotlinx.coroutines.launch
+import java.io.IOException
 import javax.inject.Inject
 
 class GroupSelectionViewModel @Inject constructor(
@@ -19,7 +20,7 @@ class GroupSelectionViewModel @Inject constructor(
     private val timeTableUseCase: IExecuteAndSaveTimeTable,
     private val deleteGroupUseCase: IDeleteGroupUseCase,
     private val isGroupInDbUseCase: IsGroupInDbUseCase,
-    private val updateGroup: IUpdateGroup
+    private val updateGroup: IUpdateGroup,
 ) : ViewModel() {
 
     val groupList = MutableLiveData<List<Group>>(listOf())
@@ -29,7 +30,7 @@ class GroupSelectionViewModel @Inject constructor(
 
     // TODO Fix error output
 
-    fun checkClickedGroup(group: Group, callback: (Group) -> Unit){
+    fun checkClickedGroup(group: Group, callback: (Group) -> Unit) {
         loading.value = LoadingState.Loading
         viewModelScope.launch {
             try {
@@ -41,57 +42,68 @@ class GroupSelectionViewModel @Inject constructor(
                     else
                         Constant.INACTIVE_ALREADY_EXIST_IN_DB
                 ))
-            }catch (ex: Exception){
+            } catch (ex: Exception) {
                 callback.invoke(group)
                 loading.postValue(LoadingState.Success(Constant.NOT_EXIST_IN_DB))
             }
         }
     }
 
-    fun updateGroupTimeTable(group: Group, callback: (Group) -> Unit){
+    fun updateGroupTimeTable(group: Group, callback: (Group) -> Unit) {
         loading.value = LoadingState.Loading
-        viewModelScope.launch{
+        viewModelScope.launch {
             try {
                 deleteGroupUseCase.deleteGroupData(group)
                 callback.invoke(timeTableUseCase.getTimeTable(TimeTableRequest(1, group)))
                 loading.postValue(LoadingState.Success(Constant.SUCCESS_TIMETABLE_UPDATE))
-            }catch (ex: Exception){
-                loading.postValue(LoadingState.Error(ex))
-            }
-        }
-    }
-
-    fun updateGroup(group: Group, callback: (Group) -> Unit){
-        loading.value = LoadingState.Loading
-        viewModelScope.launch {
-            try {
-                callback.invoke(updateGroup.updateGroup(group))
-                loading.postValue(LoadingState.Success(Constant.ACTIVE_ALREADY_EXIST_IN_DB))
             } catch (ex: Exception) {
                 loading.postValue(LoadingState.Error(ex))
             }
         }
     }
 
-   fun executeAndSaveGroupTimeTable(group: Group, callback: (Group) -> Unit){
-       loading.value = LoadingState.Loading
-       viewModelScope.launch {
-           try {
-               callback.invoke(timeTableUseCase.getTimeTable(TimeTableRequest(1, group)))
-               loading.postValue(LoadingState.Success(Constant.SUCCESS_TIMETABLE_EXECUTE))
-           } catch (ex: Exception) {
-               loading.postValue(LoadingState.Error(ExecuteTimeTableException(ex.message)))
-           }
-       }
+    fun updateGroup(group: Group, callback: (Group) -> Unit) {
+        loading.value = LoadingState.Loading
+        viewModelScope.launch {
+            try {
+                callback.invoke(updateGroup.updateGroup(group))
+                loading.postValue(LoadingState.Success(Constant.ACTIVE_ALREADY_EXIST_IN_DB))
+            } catch (ex: Exception) {
+                loading.postValue(LoadingState.Error(java.lang.Exception(
+                            if (ex is IOException)
+                                "Не удалось установить соединение с интернетом."
+                            else
+                                "Расписание некорректное. Возможно на сайте идут технические работы."
+                        )
+                    )
+                )
+            }
+        }
     }
 
-    fun updateGroupList(str: String){
+    fun executeAndSaveGroupTimeTable(group: Group, callback: (Group) -> Unit) {
+        loading.value = LoadingState.Loading
+        viewModelScope.launch {
+            try {
+                callback.invoke(timeTableUseCase.getTimeTable(TimeTableRequest(1, group)))
+                loading.postValue(LoadingState.Success(Constant.SUCCESS_TIMETABLE_EXECUTE))
+            } catch (ex: Exception) {
+                loading.postValue(LoadingState.Error(ExecuteTimeTableException(
+                    if (ex is IOException)
+                        "Не удалось установить соединение с интернетом."
+                    else
+                        "Расписание некорректное. Возможно на сайте идут технические работы."
+                )))
+            }
+        }
+    }
+
+    fun updateGroupList(str: String) {
         if (!str.isNullOrEmpty())
             viewModelScope.launch {
                 try {
                     groupList.postValue(groupUseCase.getGroup(GroupRequest(str, 1)))
-                }
-                catch (ex: Exception){
+                } catch (ex: Exception) {
                     loading.postValue(LoadingState.Error(ExecuteGroupException(ex.message)))
                 }
             }

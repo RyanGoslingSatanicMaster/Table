@@ -99,7 +99,9 @@ class GroupSelectionFragment @Inject constructor() : Fragment() {
                                 }
                         }
                         viewModel.loading.value = LoadingState.Stopped
-                    }
+                    },
+                    confirmText = "Повторить",
+                    dismissText = "Отмена"
                 )
             }
             is LoadingState.Success -> {

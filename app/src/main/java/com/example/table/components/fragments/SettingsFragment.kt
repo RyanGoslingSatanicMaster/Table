@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.glance.ImageProvider
@@ -285,14 +286,14 @@ class SettingsFragment @Inject constructor() : Fragment() {
             horizontalAlignment = Alignment.CenterHorizontally) {
             groupList?.forEach {
                 Row(modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween) {
+                    horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Box(modifier = Modifier.width(110.dp).clickable {
                         onShowGroup(it)
                     }) {
-                        Text(text = it.groupName, style = Typography.h6, color = Color.Black)
+                        Text(text = it.groupName, style = Typography.h6, color = Color.Black, textAlign = TextAlign.Center)
                     }
                     Icon(imageVector = Icons.Default.Refresh,
-                        contentDescription = null,
+                        contentDescription = "Обновить расписание",
                         modifier = Modifier
                             .defaultMinSize(minHeight = 50.dp, minWidth = 50.dp)
                             .padding(4.dp)
@@ -311,7 +312,7 @@ class SettingsFragment @Inject constructor() : Fragment() {
                             }
                     )
                     Icon(imageVector = Icons.Default.Check,
-                        contentDescription = null,
+                        contentDescription = "Сделать группу активной",
                         modifier = Modifier
                             .defaultMinSize(minHeight = 50.dp, minWidth = 50.dp)
                             .padding(4.dp)

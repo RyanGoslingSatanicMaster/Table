@@ -28,7 +28,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -44,6 +46,7 @@ import com.example.table.model.pojo.TimeTableWithLesson
 import com.example.table.ui.*
 import com.example.table.ui.theme.*
 import com.example.table.utils.ConverterUtils
+import com.example.table.utils.PrefUtils
 import java.util.*
 import javax.inject.Inject
 
@@ -51,12 +54,17 @@ class TimeTableFragment @Inject constructor(
     @DayNightMode private val isNightMode: Boolean,
     private val currentDate: Date,
     private val factory: DaggerViewModelFactory,
+    private val prefUtils: PrefUtils,
 ) : Fragment() {
 
 
     private lateinit var viewModel: TimeTableViewModel
 
     private lateinit var activityViewModel: MainViewModel
+
+    private val isAppFirstStart by lazy {
+        prefUtils.isAppFirstStart()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -88,9 +96,13 @@ class TimeTableFragment @Inject constructor(
     @Composable
     fun TimeTableLayout() {
         val list = viewModel.timeTable.observeAsState()
+        val showInstruction = remember { mutableStateOf(prefUtils.isAppFirstStart()) }
         if (list.value != null) {
-
             Box(modifier = Modifier.fillMaxSize()) {
+                    if(showInstruction.value)
+                        showInstruction {
+                            showInstruction.value = false
+                        }
                 TimeTableNavigationBar({
                     (activity as MainActivity).startGroupSelectionFragment()
                 }, {
@@ -133,6 +145,27 @@ class TimeTableFragment @Inject constructor(
             }
         }
 
+    }
+
+}
+
+@Composable
+fun showInstruction(onClick: () -> Unit) {
+    Surface(color = Color.Black.copy(alpha = 0.7f),
+        modifier = Modifier
+            .zIndex(1f)
+            .fillMaxSize()
+            .clickable { onClick() }) {
+        Column(modifier = Modifier
+            .fillMaxWidth()
+            .height(250.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "Смахните в сторону чтобы переключить день", color = Color.White, fontSize = 20.sp, textAlign = TextAlign.Center)
+            swipeAnimation(visible = true, isVertical = false)
+            Spacer(modifier = Modifier.height(40.dp))
+            Text(text = "Смахните вверх или вниз чтобы переключить неделю", color = Color.White, fontSize = 20.sp, textAlign = TextAlign.Center)
+            Spacer(modifier = Modifier.height(50.dp))
+            swipeAnimation(visible = true, isVertical = true)
+        }
     }
 
 }
@@ -278,7 +311,8 @@ fun ShowCurrentDay(
     onLinkClicked: (String) -> Unit,
 ) {
     Column(modifier = Modifier
-        .fillMaxSize().padding(top = 20.dp, bottom = 50.dp), horizontalAlignment = Alignment.Start) {
+        .fillMaxSize()
+        .padding(top = 20.dp, bottom = 50.dp), horizontalAlignment = Alignment.Start) {
         Row(horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically) {
@@ -293,12 +327,12 @@ fun ShowCurrentDay(
         }
         Spacer(modifier = Modifier.height(20.dp))
         Column(modifier = if (element.timeTableList.size >= 4)
-                Modifier
+            Modifier
                 .padding(bottom = 50.dp)
                 .verticalScroll(rememberScrollState())
                 .weight(1f, false)
-            else
-                Modifier,
+        else
+            Modifier,
             horizontalAlignment = Alignment.CenterHorizontally) {
             element.timeTableList.forEach {
                 ShowTimeTableItem(timeTableWithLesson = it, isNightMode) { onLinkClicked(it) }

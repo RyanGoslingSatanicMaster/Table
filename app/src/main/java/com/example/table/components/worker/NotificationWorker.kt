@@ -94,10 +94,19 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
     }
 
     fun showNotification(lesson: TimeTableWithLesson){
+        val notifyIntent = Intent(applicationContext, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            putExtra(ACTION_NOTIFICATION_INTENT, true)
+        }
+        val notifyPendingIntent = PendingIntent.getActivity(
+            applicationContext, 0, notifyIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
         val builder = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setSmallIcon(R.drawable.table_logo)
             .setContentTitle("Новое сообщение")
             .setContentText("Получено")
+            .setContentIntent(notifyPendingIntent)
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setSound(Settings.System.DEFAULT_NOTIFICATION_URI)
             .setAutoCancel(true)
@@ -194,5 +203,6 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
     companion object{
         const val NOTIFICATION_ID = 100
         const val CHANNEL_ID = "ALARM_CHANNEL_TIMETABLE_APP"
+        const val ACTION_NOTIFICATION_INTENT = "ACTION_NOTIFICATION_INTENT"
     }
 }

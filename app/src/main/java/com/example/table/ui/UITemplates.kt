@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
@@ -448,6 +449,30 @@ fun cloudsAnimation(visible: Boolean) {
             progress = progress,
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(
+                    RectangleShape
+                ))
+    }
+}
+
+@Composable
+fun swipeAnimation(visible: Boolean, isVertical: Boolean) {
+    AnimatedVisibility(visible = visible,
+        enter = slideInVertically(animationSpec = tween(durationMillis = 1600))
+                + fadeIn(animationSpec = tween(durationMillis = 1600)),
+        exit = slideOutVertically(animationSpec = tween(durationMillis = 1000))
+                + fadeOut(animationSpec = tween(durationMillis = 1000))
+    ) {
+        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.swipe_horizontal))
+        val progress by animateLottieCompositionAsState(composition = composition,
+            iterations = LottieConstants.IterateForever)
+        LottieAnimation(composition,
+            alignment = Alignment.Center,
+            progress = progress,
+            modifier = Modifier
+                .width(350.dp)
+                .height(150.dp)
+                .rotate(if (isVertical) 90.0f else 0.0f)
                 .clip(
                     RectangleShape
                 ))
