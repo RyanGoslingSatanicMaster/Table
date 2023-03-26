@@ -53,7 +53,6 @@ class TimeTableWidget: GlanceAppWidget() {
         val index = prefs[TimeTableWidgetReceiver.indexKey]
         val day = prefs[TimeTableWidgetReceiver.dayName]
         val list = prefs[TimeTableWidgetReceiver.listTimeTable]
-        Log.v(Constant.TAG_LIST, index.toString())
         WidgetLayout(day?:"", gson.fromJson(list, type)?: listOf(), index?.let { it.toInt() }?:0 )
     }
 }
@@ -74,14 +73,14 @@ fun WidgetHeader(day: String, index: Int){
         verticalAlignment = Alignment.CenterVertically) {
         Image(provider = ImageProvider(R.drawable.ic_left_arrow),
             contentDescription = null,
-            modifier = GlanceModifier.size(30.dp).clickable(actionRunCallback<RefreshCallback>(
+            modifier = GlanceModifier.size(40.dp).clickable(actionRunCallback<RefreshCallback>(
                 parameters = actionParametersOf(TimeTableWidget.countParamKey to index - 1))
             )
         )
         Text(text = day, style = TextStyle(color = ColorProvider(Color.White), fontSize = 15.sp))
         Image(provider = ImageProvider(R.drawable.ic_right_arrow),
             contentDescription = null,
-            modifier = GlanceModifier.size(30.dp).clickable(actionRunCallback<RefreshCallback>(
+            modifier = GlanceModifier.size(40.dp).clickable(actionRunCallback<RefreshCallback>(
                 parameters = actionParametersOf(TimeTableWidget.countParamKey to index + 1))
             )
         )
@@ -108,7 +107,7 @@ fun WidgetBody(list: List<TimeTableWithLesson>){
 class RefreshCallback : ActionCallback {
 
     companion object {
-        const val UPDATE_ACTION = "updateAction"
+        const val UPDATE_ACTION = "UPDATE_ACTION_WIDGET_TIMETABLE"
     }
 
     override suspend fun onAction(

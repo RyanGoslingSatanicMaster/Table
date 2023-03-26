@@ -1,6 +1,7 @@
 package com.example.table.ui
 
 import android.view.View
+import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -18,35 +19,31 @@ fun ComposeFragmentContainer(
     commit: FragmentTransaction.(containerId: Int) -> Unit
 ) {
     val containerId = rememberSaveable{ mutableStateOf(viewId) }
-    val initialized = rememberSaveable { mutableStateOf(false) }
     AndroidView(
         modifier = modifier,
         factory = { context ->
-            FragmentContainerView(context).apply{
-                id = containerId.value
-            }
+            fragmentManager.findFragmentById(containerId.value)?.view
+                ?.also { (it.parent as? ViewGroup)?.removeView(it) }
+                ?: FragmentContainerView(context)
+                    .apply { id = containerId.value }
+                    .also {
+                        fragmentManager.commit { commit(it.id) }
+                    }
         },
-        update = { view ->
-            if (!initialized.value){
-                fragmentManager.commit { commit(view.id) }
-                initialized.value = true
-            }
-            else {
-                fragmentManager.onContainerAvailable(view)
-            }
-        }
+        update = {}
     )
 }
 
 
 fun FragmentController(containerId: Int, fragment: Fragment, fragmentManager: FragmentManager){
-    val fragments = fragmentManager.fragments
-    if (fragments.any { it === fragment && it.isVisible})
+    val currentFragment = fragmentManager.findFragmentById(containerId)
+    if (currentFragment?.isVisible == true && currentFragment === fragment)
         return
     fragmentManager.commit {
         replace(containerId, fragment)
         addToBackStack(fragment.tag)
     }
+
 }
 
 private fun FragmentManager.onContainerAvailable(view: FragmentContainerView){

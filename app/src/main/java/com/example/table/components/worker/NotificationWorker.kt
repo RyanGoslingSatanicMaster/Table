@@ -120,13 +120,11 @@ class NotificationWorker(appContext: Context, workerParams: WorkerParameters) :
         val mNotificationManager =
             applicationContext.getSystemService(LifecycleService.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            val channel = NotificationChannel(CHANNEL_ID,
-                "Уведомления о парах",
-                NotificationManager.IMPORTANCE_DEFAULT)
-            mNotificationManager.createNotificationChannel(channel)
+        val channel = NotificationChannel(CHANNEL_ID,
+            "Уведомления о парах",
+            NotificationManager.IMPORTANCE_DEFAULT)
+        mNotificationManager.createNotificationChannel(channel)
 
-        }
         with(mNotificationManager){
             notify(NOTIFICATION_ID, notification)
         }

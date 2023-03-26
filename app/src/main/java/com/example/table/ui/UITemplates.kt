@@ -110,6 +110,7 @@ fun CustomAlertDialog(startValue: Int, onSave: (Int) -> Unit, onExit: () -> Unit
 
     val hour = remember { mutableStateOf((startValue/60).toString()) }
     val minutes = remember { mutableStateOf((startValue - (startValue/60) * 60).toString()) }
+    val enable = hour.value.validateInputTimeHours() && minutes.value.validateInputTimeMinute()
     Dialog(onDismissRequest = { onExit() }, properties = DialogProperties(
         dismissOnBackPress = true, dismissOnClickOutside = true
     )) {
@@ -143,7 +144,7 @@ fun CustomAlertDialog(startValue: Int, onSave: (Int) -> Unit, onExit: () -> Unit
                     OutlinedTextField(
                         value = hour.value,
                         onValueChange = {
-                            if (it.validateInputTimeHours()) hour.value = it
+                            if (it.length <= 2) hour.value = it
                         },
                         textStyle = TextStyle(fontSize = 25.sp, color = Color.White),
                         singleLine = true,
@@ -173,7 +174,7 @@ fun CustomAlertDialog(startValue: Int, onSave: (Int) -> Unit, onExit: () -> Unit
                     OutlinedTextField(
                         value = minutes.value,
                         onValueChange = {
-                            if (it.validateInputTimeMinute()) minutes.value = it
+                            if (it.length <= 2) minutes.value = it
                         },
                         textStyle = TextStyle(fontSize = 25.sp, color = Color.White),
                         singleLine = true,
@@ -192,10 +193,17 @@ fun CustomAlertDialog(startValue: Int, onSave: (Int) -> Unit, onExit: () -> Unit
                     )
                 }
 
+                if (!enable)
+                    Row(Modifier.padding(top = 10.dp)) {
+                        Text(text = "Некорретное время", color = Color.Red)
+                    }
+
+
                 Row(Modifier.padding(top = 10.dp)) {
                     OutlinedButton(
+                        enabled = enable,
                         onClick = { onSave(hour.value.convertToTime() * 60 + minutes.value.convertToTime()) },
-                        Modifier
+                        modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp)
                     ) {

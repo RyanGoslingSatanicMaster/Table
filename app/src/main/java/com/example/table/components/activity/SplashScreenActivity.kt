@@ -53,7 +53,10 @@ class SplashScreenActivity : AppCompatActivity() {
                     ACTIVE_GROUP_TAG,
                     (loading.value as LoadingState.Success).tag == SplashScreenViewModel.SUCCESS_ACTIVE_GROUP
                 )
+                intent.flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 startActivity(intent)
+                finish()
             }
         }
     }

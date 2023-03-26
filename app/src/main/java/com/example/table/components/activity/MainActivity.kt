@@ -1,40 +1,32 @@
 package com.example.table.components.activity
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.PowerManager
-import android.os.SystemClock
 import android.provider.Settings
-import android.util.Log
 import android.view.View
-import android.view.WindowInsets
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.core.app.ActivityCompat
-import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.table.components.RefreshCallback
 import com.example.table.components.TableApp
 import com.example.table.components.broadcasts.AlarmReceiver
+import com.example.table.components.broadcasts.TimeTableWidgetReceiver
 import com.example.table.components.fragments.GroupSelectionFragment
 import com.example.table.components.fragments.SettingsFragment
 import com.example.table.components.fragments.TimeTableFragment
@@ -53,6 +45,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Provider
+import kotlin.properties.Delegates
 
 
 class MainActivity : AppCompatActivity() {
@@ -71,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var viewModel: MainViewModel
 
-    lateinit var activityComponent: MainActivityComponent
+    private lateinit var activityComponent: MainActivityComponent
 
     lateinit var alarmPendingIntent: PendingIntent
 
@@ -79,10 +72,21 @@ class MainActivity : AppCompatActivity() {
         intent.getBooleanExtra(NotificationWorker.ACTION_NOTIFICATION_INTENT, false)
     }
 
+    private val permLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) {
+        permissionNotification = it
+        if (!it)
+            returnNotifySettings()
+    }
+
+
+    private var permissionNotification by Delegates.notNull<Boolean>()
+
     val fragmentContainerId: Int = View.generateViewId()
 
 
-    companion object{
+    companion object {
         const val NOTIFY_KEY = "NOTIFY_KEY"
         const val ALARM_ACTION = "ALARM_ACTION_TIMETABLE_APP"
     }
@@ -90,11 +94,20 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         if (isGestureNavigationMode(this.contentResolver))
             WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        permissionNotification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.SCHEDULE_EXACT_ALARM) == PackageManager.PERMISSION_GRANTED else true
+
         alarmPendingIntent = Intent(this, AlarmReceiver::class.java).let {
             it.action = ALARM_ACTION
-            PendingIntent.getBroadcast(this, 0, it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getBroadcast(this,
+                0,
+                it,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
 
         activityComponent = (application as TableApp).appComponent.getMainActivityComponent(
@@ -112,16 +125,17 @@ class MainActivity : AppCompatActivity() {
 
         initSubscribes()
 
-        onBackPressedDispatcher.addCallback(this){
+        onBackPressedDispatcher.addCallback(this) {
             lastBackStackFragment()
         }
 
         setContent {
             TableTheme {
                 transparentStatusBar()
-                ComposeFragmentContainer(viewId = fragmentContainerId, fragmentManager = this.supportFragmentManager
+                ComposeFragmentContainer(viewId = fragmentContainerId,
+                    fragmentManager = this.supportFragmentManager
                 ) {
-                    when{
+                    when {
                         activeGroup && viewModel.activeGroup.value == null || isFromNotification -> {
                             viewModel.getActiveGroup()
                             add(it, fragmentMap[TimeTableFragment::class.java]!!.get())
@@ -143,20 +157,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun initSubscribes() {
-        viewModel.notificationSettings.observe(this){ triple ->
+        viewModel.notificationSettings.observe(this) { triple ->
             if (triple != null) {
                 if (triple.first || triple.second)
                     viewModel.activeGroup.value?.let {
                         if (it.isActive && it.dateOfFirstWeek != null)
-                            viewModel.getNextLessonTime(NextLessonRequest(triple, it), ::setNewAlarm)
+                            viewModel.getNextLessonTime(NextLessonRequest(triple, it),
+                                ::setNewAlarm)
                     }
                 else
                     cancelNextAlarm()
             }
         }
 
-        viewModel.activeGroup.observe(this){ group ->
-            if (group != null)
+        viewModel.activeGroup.observe(this) { group ->
+            if (group != null) {
+                val intent = Intent(this, TimeTableWidgetReceiver::class.java).apply {
+                    action = RefreshCallback.UPDATE_ACTION
+                }
+                sendBroadcast(intent)
                 viewModel.notificationSettings.value?.let {
                     if (it.first || it.second) {
                         if (group.isActive && group.dateOfFirstWeek != null)
@@ -164,21 +183,22 @@ class MainActivity : AppCompatActivity() {
                     } else
                         cancelNextAlarm()
                 }
+            }
         }
     }
 
     @Composable
-    fun transparentStatusBar(){
+    fun transparentStatusBar() {
         val systemUiController = rememberSystemUiController()
         SideEffect {
             systemUiController.setStatusBarColor(
                 color = Transparent,
-                darkIcons = false
+                darkIcons = true
             )
         }
     }
 
-    fun requestPermission(callback: () -> Unit){
+    fun requestPermission(callback: () -> Unit) {
         /*val intent = Intent()
         val powerManager = getSystemService(POWER_SERVICE) as PowerManager
         if (powerManager.isIgnoringBatteryOptimizations(packageName))
@@ -189,42 +209,43 @@ class MainActivity : AppCompatActivity() {
         }
         startActivity(intent)*/
         if (Build.VERSION.SDK_INT >= 31) {
-            val permission = ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.SCHEDULE_EXACT_ALARM
-            )
-            if (permission == PackageManager.PERMISSION_GRANTED)
+            if (permissionNotification)
                 callback.invoke()
-            else
-                returnNotifySettings()
-        }
-        else
+            else {
+                permLauncher.launch(Manifest.permission.SCHEDULE_EXACT_ALARM)
+                callback.invoke()
+            }
+        } else
             callback.invoke()
     }
 
-    private fun returnNotifySettings(){
+    private fun returnNotifySettings() {
         Toast.makeText(
             this,
             "Разрешение на использование будильника отключено",
             Toast.LENGTH_LONG
         ).show()
-        viewModel.notificationSettings.value = Triple(false, false, 5)
-
+        val triple = Triple(false, false, 5)
+        viewModel.notificationSettings.value = triple
+        prefUtils.setNotifications(triple)
     }
 
-    fun navigateWebView(url: String){
+    fun navigateWebView(url: String) {
         val httpIntent = Intent(Intent.ACTION_VIEW)
         httpIntent.data = Uri.parse(url)
         startActivity(httpIntent)
     }
 
-    private fun cancelNextAlarm(){
+    private fun cancelNextAlarm() {
         val next = alarmManager.nextAlarmClock
         if (next != null)
             alarmManager.cancel(alarmPendingIntent)
     }
 
-    private fun setNewAlarm(nextLessonTime: TimeTableWithLesson, settings: Triple<Boolean, Boolean, Int>){
+    private fun setNewAlarm(
+        nextLessonTime: TimeTableWithLesson,
+        settings: Triple<Boolean, Boolean, Int>,
+    ) {
         val next = alarmManager.nextAlarmClock
         val cal = Calendar.getInstance().apply {
             time = nextLessonTime.timeTable.time
@@ -232,7 +253,7 @@ class MainActivity : AppCompatActivity() {
         }
         if (next != null)
             alarmManager.cancel(alarmPendingIntent)
-        if (!settings.first && !settings.second )
+        if (!settings.first && !settings.second)
             return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
             if (alarmManager.canScheduleExactAlarms())
@@ -242,8 +263,13 @@ class MainActivity : AppCompatActivity() {
                         alarmPendingIntent),
                     alarmPendingIntent
                 )
-            else
+            else {
                 returnNotifySettings()
+                Intent().also { intent ->
+                    intent.action = Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM
+                    startActivity(intent)
+                }
+            }
         else
             alarmManager.setAlarmClock(
                 AlarmManager.AlarmClockInfo(
@@ -254,28 +280,34 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun getNotifications(){
+    private fun getNotifications() {
         viewModel.notificationSettings.value = prefUtils.getNotifications()
     }
 
-    fun setNotifications(pair: Triple<Boolean, Boolean, Int>){
+    fun setNotifications(pair: Triple<Boolean, Boolean, Int>) {
         viewModel.notificationSettings.value = pair
         prefUtils.setNotifications(pair)
     }
 
-    fun startTimeTableFragment(){
-        FragmentController(fragmentContainerId, fragmentMap.get(TimeTableFragment::class.java)!!.get(), supportFragmentManager)
+    fun startTimeTableFragment() {
+        FragmentController(fragmentContainerId,
+            fragmentMap.get(TimeTableFragment::class.java)!!.get(),
+            supportFragmentManager)
     }
 
-    fun startGroupSelectionFragment(){
-        FragmentController(fragmentContainerId, fragmentMap.get(GroupSelectionFragment::class.java)!!.get(), supportFragmentManager)
+    fun startGroupSelectionFragment() {
+        FragmentController(fragmentContainerId,
+            fragmentMap.get(GroupSelectionFragment::class.java)!!.get(),
+            supportFragmentManager)
     }
 
-    fun startSettingsFragment(){
-        FragmentController(fragmentContainerId, fragmentMap.get(SettingsFragment::class.java)!!.get(), supportFragmentManager)
+    fun startSettingsFragment() {
+        FragmentController(fragmentContainerId,
+            fragmentMap.get(SettingsFragment::class.java)!!.get(),
+            supportFragmentManager)
     }
 
-    private fun lastBackStackFragment(){
+    private fun lastBackStackFragment() {
         val stackSize = supportFragmentManager.backStackEntryCount
         if (stackSize != 0)
             supportFragmentManager.popBackStack()

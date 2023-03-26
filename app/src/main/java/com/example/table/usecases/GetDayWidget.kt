@@ -5,6 +5,7 @@ import com.example.table.annotations.DayWeek
 import com.example.table.model.pojo.DayTimeTable
 import com.example.table.model.pojo.TimeTableWithLesson
 import com.example.table.repositories.ITimeTableRepository
+import com.example.table.utils.ConverterUtils
 import java.time.Duration
 import java.util.*
 import javax.inject.Inject
@@ -16,7 +17,7 @@ class GetDayWidget @Inject constructor(private val timeTableRepository: ITimeTab
 
     override suspend fun run(p: Int): DayTimeTable? {
         try {
-            return timeTableRepository.getTimeTableActiveGroup().splitDay(if (p == -1) currentDate.day else p)
+            return timeTableRepository.getTimeTableActiveGroup().splitDay(p)
         }catch (ex: Exception){
             return null
         }
@@ -27,28 +28,26 @@ class GetDayWidget @Inject constructor(private val timeTableRepository: ITimeTab
     }
 
     private fun List<TimeTableWithLesson>.splitDay(index: Int): DayTimeTable?{
-        val isFirstWeek = getCurrentWeekIndex(this[0].lesson.group?.dateOfFirstWeek?: Date())
+        var isFirstWeek = ConverterUtils.isFirstWeek(this[0].lesson.group?.dateOfFirstWeek!!, currentDate)
+        val dayIndex = when {
+            currentDate.day == 0 ->{
+                isFirstWeek = !isFirstWeek
+                if (index == -1)
+                    1
+                else
+                    index
+            }
+            index == -1 && currentDate.day != 0 -> currentDate.day
+            else -> index
+        }
         return DayTimeTable(
             when{
-                index == currentDate.day -> "Сегодня"
-                index == currentDate.day + 1 -> "Завтра"
-                else -> dayWeek[index].first
+                dayIndex == currentDate.day -> "Сегодня"
+                dayIndex == currentDate.day + 1 -> "Завтра"
+                else -> dayWeek[dayIndex].first
             },
             this.filter { it.timeTable.isFirstWeek == isFirstWeek && it.timeTable.time.day == index }
         )
-    }
-
-    fun getCurrentWeekIndex(date: Date): Boolean{
-        val cal = Calendar.getInstance()
-        cal.time = date
-        val cal2 = Calendar.getInstance()
-        cal2.time = currentDate
-        val daysBetween = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Duration.between(cal.toInstant(), cal2.toInstant()).toDays()
-        } else {
-            (cal2.timeInMillis)/60/60/24 - (cal2.timeInMillis)/60/60/24
-        }
-        return ((daysBetween/7)%2 == 0L)
     }
 
 }

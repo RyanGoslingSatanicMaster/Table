@@ -62,10 +62,6 @@ class TimeTableFragment @Inject constructor(
 
     private lateinit var activityViewModel: MainViewModel
 
-    private val isAppFirstStart by lazy {
-        prefUtils.isAppFirstStart()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?,
