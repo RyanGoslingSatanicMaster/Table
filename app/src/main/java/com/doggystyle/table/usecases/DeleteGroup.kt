@@ -4,7 +4,7 @@ import com.doggystyle.table.model.db.Group
 import com.doggystyle.table.repositories.IGroupRepository
 import javax.inject.Inject
 
-class DeleteGroupUseCase @Inject constructor(val repository: IGroupRepository): IDeleteGroupUseCase, UseCase<Unit, Group>() {
+class DeleteGroup @Inject constructor(val repository: IGroupRepository): IDeleteGroup, UseCase<Unit, Group>() {
 
     override suspend fun run(p: Group) {
         return repository.deleteGroupData(p)

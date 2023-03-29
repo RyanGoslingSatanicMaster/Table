@@ -7,6 +7,7 @@ import com.doggystyle.table.model.pojo.WeekTimeTable
 import com.doggystyle.table.model.db.Group
 import com.doggystyle.table.model.pojo.TimeTableWithLesson
 import com.doggystyle.table.repositories.ITimeTableRepository
+import com.doggystyle.table.utils.ConverterUtils
 import java.time.Duration
 import java.util.*
 import javax.inject.Inject
@@ -25,9 +26,9 @@ class GetTimeTable @Inject constructor(private val repository: ITimeTableReposit
     }
 
     private fun List<TimeTableWithLesson>.splitWeek(): Pair<WeekTimeTable, WeekTimeTable>{
-        val dateIndex = getCurrentDayIndex(this[0].lesson.group?.dateOfFirstWeek?: Date())
-        return this.filter { it.timeTable.isFirstWeek }.toList().splitDays(dateIndex) to
-        this.filter { !it.timeTable.isFirstWeek }.toList().splitDays(!dateIndex)
+        val currentWeek = getCurrentDayIndex(this[0].lesson.group?.dateOfFirstWeek?: Date())
+        return this.filter { it.timeTable.isFirstWeek }.toList().splitDays(currentWeek) to
+        this.filter { !it.timeTable.isFirstWeek }.toList().splitDays(!currentWeek)
     }
 
     private fun List<TimeTableWithLesson>.splitDays(currentWeek: Boolean): WeekTimeTable {
@@ -54,14 +55,11 @@ class GetTimeTable @Inject constructor(private val repository: ITimeTableReposit
 
     fun getCurrentDayIndex(date: Date): Boolean{
         val cal = Calendar.getInstance()
-        cal.time = date
+        cal.time = ConverterUtils.getFirstDayOfWeek(date)
         val cal2 = Calendar.getInstance()
-        cal2.time = currentDate
-        val daysBetween = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Duration.between(cal.toInstant(), cal2.toInstant()).toDays()
-        } else {
-            (cal2.timeInMillis)/60/60/24 - (cal2.timeInMillis)/60/60/24
-        }
+        cal2.time = ConverterUtils.getFirstDayOfWeek(currentDate)
+        val daysBetween =
+            Duration.between(cal.toInstant(), cal2.toInstant()).toDays() + 1
         return ((daysBetween/7)%2 == 0L)
     }
 

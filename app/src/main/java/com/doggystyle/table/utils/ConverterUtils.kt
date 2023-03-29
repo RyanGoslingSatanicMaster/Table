@@ -1,6 +1,9 @@
 package com.doggystyle.table.utils
 
 import android.os.Build
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.room.TypeConverter
 import java.text.SimpleDateFormat
 import java.time.Duration
@@ -63,19 +66,6 @@ class ConverterUtils {
                 str.contains("Суббота") || str.contains("сб") -> formatterDate.parse(PREFIX_WEEK["Суббота"] + str)
                 else -> formatterDate.parse(PREFIX_WEEK["Воскресение"] + str)
             }
-        }
-
-        fun convertToTime(time: String): String{
-            if (time.length > 1 && time.startsWith("0"))
-                return time.replaceFirst("0", "")
-            return time
-        }
-
-        fun validateInputTimeMinute(minute: String): Boolean{
-            return (minute.length <= 2) && minute.isNotEmpty() && minute.toInt() < 60 || minute.isEmpty()
-        }
-        fun validateInputTimeHours(minute: String): Boolean{
-            return (minute.length <= 2) && minute.isNotEmpty() && minute.toInt() < 24 || minute.isEmpty()
         }
 
     }

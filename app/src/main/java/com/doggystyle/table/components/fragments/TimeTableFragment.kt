@@ -26,7 +26,9 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -306,6 +308,10 @@ fun ShowCurrentDay(
     isNightMode: Boolean,
     onLinkClicked: (String) -> Unit,
 ) {
+    val size = remember {
+        mutableStateOf(-1)
+    }
+    val displaySize = LocalConfiguration.current.screenHeightDp.dp
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(top = 20.dp, bottom = 50.dp), horizontalAlignment = Alignment.Start) {
@@ -316,19 +322,21 @@ fun ShowCurrentDay(
                 style = Typography.h1,
                 color = Color.White,
                 modifier = Modifier.padding(10.dp))
-            Text(text = if (isFirstWeek) "1-ая неделя" else "2-я неделя",
+            Text(text = if (isFirstWeek) "1-я неделя" else "2-я неделя",
                 style = Typography.h3,
                 color = Color.White,
                 modifier = Modifier.padding(10.dp))
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Column(modifier = if (element.timeTableList.size >= 4)
+        Column(modifier = if (size.value.pxToDp().value > 0.8 * displaySize.value)
             Modifier
                 .padding(bottom = 50.dp)
                 .verticalScroll(rememberScrollState())
                 .weight(1f, false)
         else
-            Modifier,
+            Modifier.onGloballyPositioned {
+                size.value = it.size.height
+            },
             horizontalAlignment = Alignment.CenterHorizontally) {
             element.timeTableList.forEach {
                 ShowTimeTableItem(timeTableWithLesson = it, isNightMode) { onLinkClicked(it) }

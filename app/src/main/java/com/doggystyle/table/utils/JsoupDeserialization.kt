@@ -27,7 +27,7 @@ fun timeTableDeserialization(html: String, group: Group): List<TimeTableWithLess
 
 @RequiresApi(Build.VERSION_CODES.O)
 fun Element.getDateOfFirstWeek(): Date {
-    if(this.text().contains("1-ая неделя"))
+    if(this.text().contains("1-я неделя"))
         return Date()
     else {
         val cal = Calendar.getInstance()

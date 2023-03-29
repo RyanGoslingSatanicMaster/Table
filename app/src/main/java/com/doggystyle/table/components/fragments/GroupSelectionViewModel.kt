@@ -18,8 +18,8 @@ import javax.inject.Inject
 class GroupSelectionViewModel @Inject constructor(
     val groupUseCase: IGetGroups,
     private val timeTableUseCase: IExecuteAndSaveTimeTable,
-    private val deleteGroupUseCase: IDeleteGroupUseCase,
-    private val isGroupInDbUseCase: IsGroupInDbUseCase,
+    private val deleteGroupUseCase: IDeleteGroup,
+    private val isGroupInDbUseCase: IsGroupInDb,
     private val updateGroup: IUpdateGroup,
 ) : ViewModel() {
 

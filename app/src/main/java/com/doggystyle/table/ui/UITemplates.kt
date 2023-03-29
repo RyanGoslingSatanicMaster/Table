@@ -48,6 +48,9 @@ enum class PositionState {
 }
 
 @Composable
+fun Int.pxToDp(): Dp = with(LocalDensity.current) { this@pxToDp.toDp() }
+
+@Composable
 fun progressBar(visible: Boolean) {
     AnimatedVisibility(visible = visible,
         enter = slideInHorizontally(animationSpec = tween(durationMillis = 1600))

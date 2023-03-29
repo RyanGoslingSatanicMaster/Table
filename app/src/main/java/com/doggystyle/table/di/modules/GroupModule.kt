@@ -21,14 +21,17 @@ abstract class GroupModule {
     abstract fun provideGroupService(service: GroupService): IGroupService
 
     @Binds
-    abstract fun providesIsGroupInDbUseCase(useCase: IsGroupInDbUseCase): IIsGroupInDbUseCase
+    abstract fun providesIsGroupInDbUseCase(useCase: IsGroupInDb): IIsGroupInDb
 
     @Binds
-    abstract fun providesDeleteGroupUseCase(useCase: DeleteGroupUseCase): IDeleteGroupUseCase
+    abstract fun providesDeleteGroupUseCase(useCase: DeleteGroup): IDeleteGroup
 
     @Binds
     abstract fun providesGetActiveGroupUseCase(useCase:GetActiveGroup): IGetActiveGroup
 
     @Binds
     abstract fun providesUpdateGroupUseCase(usecase: UpdateGroup): IUpdateGroup
+
+    @Binds
+    abstract fun providesGetGroups(usecase: GetSavedGroups): IGetSavedGroups
 }

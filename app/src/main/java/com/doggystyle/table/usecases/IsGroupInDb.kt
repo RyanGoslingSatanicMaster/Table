@@ -1,11 +1,10 @@
 package com.doggystyle.table.usecases
 
 import com.doggystyle.table.model.db.Group
-import com.doggystyle.table.repositories.GroupRepository
 import com.doggystyle.table.repositories.IGroupRepository
 import javax.inject.Inject
 
-class IsGroupInDbUseCase @Inject constructor(val repository: IGroupRepository): UseCase<Group, Group>(), IIsGroupInDbUseCase {
+class IsGroupInDb @Inject constructor(val repository: IGroupRepository): UseCase<Group, Group>(), IIsGroupInDb {
 
     override suspend fun isGroupInDb(group: Group): Group {
         return run(group)

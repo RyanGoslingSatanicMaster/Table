@@ -12,9 +12,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class SettingsViewModel @Inject constructor(
-    private val getSavedGroups: GetSavedGroups,
-    private val updateActiveGroup: UpdateGroup,
-    private val executeAndSaveTimeTable: ExecuteAndSaveTimeTable
+    private val getSavedGroups: IGetSavedGroups,
+    private val updateActiveGroup: IUpdateGroup,
+    private val executeAndSaveTimeTable: IExecuteAndSaveTimeTable,
+    private val deleteGroup: IDeleteGroup
 ) : ViewModel() {
 
     val groupList = MutableLiveData<List<Group>?>(null)
@@ -40,6 +41,7 @@ class SettingsViewModel @Inject constructor(
     fun refreshGroupTimeTable(group: Group, callback: (Group) -> Unit, onError: (Exception) -> Unit){
         viewModelScope.launch {
             try {
+                deleteGroup.deleteGroupData(group)
                 executeAndSaveTimeTable.getTimeTable(TimeTableRequest(1, group))
                 callback(group)
             }catch (ex: Exception){
