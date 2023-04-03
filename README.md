@@ -33,3 +33,6 @@ During development, I used the following technologies:
 6. Widget UI built using Glance.
 7. Vector Animation provided by Lottie Animation.
 8. Html parser developed using Jsoup Library.
+
+## Google release
+https://play.google.com/store/apps/details?id=com.doggystyle.table
